@@ -1,0 +1,12 @@
+Place your Ramadan challenge images in this folder.
+Ensure filenames match the paths defined in data.ts.
+
+Required files based on current data.ts:
+- lantern_thumb.jpg / lantern_full.jpg
+- praying_man_thumb.jpg / praying_man_full.jpg
+- iftar_dates_thumb.jpg / iftar_dates_full.jpg
+- prayer_mat_thumb.jpg / prayer_mat_full.jpg
+- decorations_thumb.jpg / decorations_full.jpg
+- mosque_interior_thumb.jpg / mosque_interior_full.jpg
+- kitchen_prep_thumb.jpg / kitchen_prep_full.jpg
+- outdoor_lanterns_thumb.jpg / outdoor_lanterns_full.jpg
