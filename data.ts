@@ -4,8 +4,8 @@ import { SearchResult } from './types';
 export const STATIC_RESULTS: SearchResult[] = [
   {
     id: '1',
-    thumbnail: 'assets/dates.webp',
-    preview: 'assets/dates.webp',
+    thumbnail: 'https://images.unsplash.com/photo-1584270354949-c26b0d5b4a0c?auto=format&fit=crop&q=80&w=600',
+    preview: 'https://images.unsplash.com/photo-1584270354949-c26b0d5b4a0c?auto=format&fit=crop&q=80&w=1200',
     camera: 'Dining Hall - Cam 04',
     timestamp: '2024-03-24 18:30:05',
     score: 98,
@@ -13,8 +13,8 @@ export const STATIC_RESULTS: SearchResult[] = [
   },
   {
     id: '2',
-    thumbnail: 'assets/iftar.webp',
-    preview: 'assets/iftar.webp',
+    thumbnail: 'https://images.unsplash.com/photo-1563294340-9a4f49202613?auto=format&fit=crop&q=80&w=600',
+    preview: 'https://images.unsplash.com/photo-1563294340-9a4f49202613?auto=format&fit=crop&q=80&w=1200',
     camera: 'Main Entrance - Cam 01',
     timestamp: '2024-03-24 18:45:12',
     score: 95,
@@ -22,8 +22,8 @@ export const STATIC_RESULTS: SearchResult[] = [
   },
   {
     id: '3',
-    thumbnail: 'assets/prayer-mat.webp',
-    preview: 'assets/prayer-mat.webp',
+    thumbnail: 'https://images.unsplash.com/photo-1551041777-ed07f99b67d1?auto=format&fit=crop&q=80&w=600',
+    preview: 'https://images.unsplash.com/photo-1551041777-ed07f99b67d1?auto=format&fit=crop&q=80&w=1200',
     camera: 'Prayer Room - Cam 02',
     timestamp: '2024-03-24 19:15:20',
     score: 92,

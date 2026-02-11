@@ -53,14 +53,17 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, onSearch }) => {
       .sort((a, b) => (b.currentMatchScore ?? 0) - (a.currentMatchScore ?? 0) || (b.displayScore ?? 0) - (a.displayScore ?? 0));
   }, [initialQuery, similarity]);
 
+  // Auto-select first result when search results change
   useEffect(() => {
     if (filteredResults.length > 0) {
-      const stillExists = filteredResults.find(r => r.id === selectedResult?.id);
-      if (!stillExists) setSelectedResult(filteredResults[0]);
+      const isStillInList = filteredResults.some(r => r.id === selectedResult?.id);
+      if (!isStillInList) {
+        setSelectedResult(filteredResults[0]);
+      }
     } else {
       setSelectedResult(null);
     }
-  }, [filteredResults, selectedResult?.id]);
+  }, [filteredResults]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -186,6 +189,7 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, onSearch }) => {
 
       {filteredResults.length > 0 ? (
         <div className="flex flex-col min-[1100px]:grid min-[1100px]:grid-cols-[1fr_450px] gap-6 md:gap-8">
+          {/* Results List */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 order-2 min-[1100px]:order-1">
             {filteredResults.map((result) => (
               <div
@@ -198,10 +202,9 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, onSearch }) => {
                 <div className="aspect-video relative overflow-hidden bg-slate-900 flex items-center justify-center">
                   {!imageErrors[`thumb-${result.id}`] ? (
                     <img 
-                      key={`thumb-${result.id}`}
                       src={result.thumbnail} 
                       alt={result.camera} 
-                      className="w-full h-full object-cover block"
+                      className="w-full h-full object-cover block transition-transform group-hover:scale-105"
                       onError={() => handleImageError(`thumb-${result.id}`)}
                     />
                   ) : (
@@ -222,6 +225,7 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, onSearch }) => {
             ))}
           </div>
 
+          {/* Large Preview Sidebar */}
           <div className="space-y-4 order-1 min-[1100px]:order-2">
             <div className="min-[1100px]:sticky min-[1100px]:top-24 bg-[#11111a] rounded-2xl p-4 shadow-2xl border border-[#2d2d3f] overflow-hidden">
               <div className="aspect-video relative rounded-lg overflow-hidden mb-4 bg-slate-900 border border-[#2d2d3f] flex items-center justify-center">
@@ -230,8 +234,8 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, onSearch }) => {
                      <img 
                        key={`preview-${selectedResult.id}`}
                        src={selectedResult.preview} 
-                       alt="Preview" 
-                       className="max-w-full max-h-full object-contain block"
+                       alt="Large Preview" 
+                       className="w-full h-full object-cover block"
                        onError={() => handleImageError(`preview-${selectedResult.id}`)}
                      />
                    ) : (
@@ -276,6 +280,7 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, onSearch }) => {
             </div>
           </div>
 
+          {/* Mobile Bottom Bar */}
           {selectedResult && (
             <div className="min-[1100px]:hidden fixed bottom-0 left-0 right-0 p-4 bg-[#11111a]/95 backdrop-blur-md border-t border-[#2d2d3f] z-50 animate-in slide-in-from-bottom duration-300">
               <div className="max-w-7xl mx-auto">
