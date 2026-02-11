@@ -1,6 +1,5 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
-import { Search, SlidersHorizontal, CornerUpLeft, Facebook, Clock, ImageOff } from 'lucide-react';
+import { Search, SlidersHorizontal, CornerUpLeft, Facebook, Clock, ImageOff, Loader2 } from 'lucide-react';
 import { STATIC_RESULTS } from '../data';
 import { SearchResult } from '../types';
 
@@ -63,7 +62,7 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, onSearch }) => {
     } else {
       setSelectedResult(null);
     }
-  }, [filteredResults]);
+  }, [filteredResults, selectedResult?.id]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -206,6 +205,7 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, onSearch }) => {
                       alt={result.camera} 
                       className="w-full h-full object-cover block transition-transform group-hover:scale-105"
                       onError={() => handleImageError(`thumb-${result.id}`)}
+                      loading="lazy"
                     />
                   ) : (
                     <div className="flex flex-col items-center gap-2 text-slate-600">
@@ -225,7 +225,7 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, onSearch }) => {
             ))}
           </div>
 
-          {/* Large Preview Sidebar */}
+          {/* Large Preview Sidebar - THE MAIN FIX AREA */}
           <div className="space-y-4 order-1 min-[1100px]:order-2">
             <div className="min-[1100px]:sticky min-[1100px]:top-24 bg-[#11111a] rounded-2xl p-4 shadow-2xl border border-[#2d2d3f] overflow-hidden">
               <div className="aspect-video relative rounded-lg overflow-hidden mb-4 bg-slate-900 border border-[#2d2d3f] flex items-center justify-center">
@@ -235,19 +235,22 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, onSearch }) => {
                        key={`preview-${selectedResult.id}`}
                        src={selectedResult.preview} 
                        alt="Large Preview" 
-                       className="w-full h-full object-cover block"
+                       className="w-full h-full object-cover block animate-in fade-in duration-300"
                        onError={() => handleImageError(`preview-${selectedResult.id}`)}
                      />
                    ) : (
-                     <div className="flex flex-col items-center gap-4 text-slate-600">
+                     <div className="flex flex-col items-center gap-4 text-slate-600 text-center px-4">
                         <ImageOff size={48} />
-                        <span className="text-xs font-bold uppercase tracking-widest">Image Load Error</span>
+                        <span className="text-xs font-bold uppercase tracking-widest leading-relaxed">Image Load Error<br/><span className="text-[10px] font-normal lowercase opacity-50">Remote asset unreachable</span></span>
                      </div>
                    )
                 ) : (
-                  <div className="text-slate-600 text-xs italic">Select a result to preview</div>
+                  <div className="text-slate-600 text-xs italic flex items-center gap-2">
+                    <Loader2 size={16} className="animate-spin" />
+                    Waiting for selection...
+                  </div>
                 )}
-                <div className="absolute bottom-2 right-2 px-2 py-1 bg-black/60 rounded text-[8px] md:text-[9px] text-slate-300">REC 10:31:11</div>
+                <div className="absolute bottom-2 right-2 px-2 py-1 bg-black/60 rounded text-[8px] md:text-[9px] text-slate-300 pointer-events-none">REC 10:31:11</div>
               </div>
               
               {selectedResult && (
