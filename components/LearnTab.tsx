@@ -1,7 +1,15 @@
 import React from 'react';
 import { ExternalLink, Zap, Target, Search } from 'lucide-react';
+import { analytics } from '../services/analytics';
 
 const LearnTab: React.FC = () => {
+  const handleLearnMoreClick = () => {
+    analytics.trackEvent('learn_more_click', {
+      source: 'learn_tab_cta',
+      target: 'hikvision_nvr_products'
+    });
+  };
+
   return (
     <div className="max-w-6xl mx-auto animate-in slide-in-from-bottom-4 duration-500 py-10">
       <div className="bg-[#11111a] rounded-[2rem] overflow-hidden border border-[#2d2d3f] shadow-2xl">
@@ -41,6 +49,7 @@ const LearnTab: React.FC = () => {
                   href="https://www.hikvision.com/mena-en/products/IP-Products/Network-Video-Recorders/?category=Network+Products&subCategory=Network+Video+Recorders&checkedSubSeries=null"
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={handleLearnMoreClick}
                   className="inline-flex items-center gap-2 px-10 py-4.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-900/20 active:scale-95 text-base"
                 >
                   Learn more

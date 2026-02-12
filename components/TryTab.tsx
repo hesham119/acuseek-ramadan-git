@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Search, SlidersHorizontal, CornerUpLeft, Facebook, Clock, ImageOff, Loader2 } from 'lucide-react';
 import { STATIC_RESULTS } from '../data';
 import { SearchResult } from '../types';
+import { analytics } from '../services/analytics';
 
 interface TryTabProps {
   initialQuery: string;
@@ -189,16 +190,38 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, initialResultId, onSearch
       return;
     }
     setError(null);
+    
+    // Track search query
+    analytics.trackEvent('search_performed', { 
+      query: query.trim(),
+      similarity_threshold: similarity
+    });
+    
     onSearch(query.trim());
   };
 
   const handleSelectResult = (result: SearchResult) => {
     setSelectedResult(result);
+    
+    // Track result selection
+    analytics.trackEvent('result_selected', { 
+      result_id: result.id,
+      camera: result.camera,
+      similarity_score: result.displayScore
+    });
+
     if (onSelectResult) onSelectResult(result.id);
   };
 
   const handleShare = () => {
     if (!selectedResult) return;
+
+    // Track share action
+    analytics.trackEvent('share_to_facebook', {
+      result_id: selectedResult.id,
+      camera: selectedResult.camera
+    });
+
     const baseUrl = window.location.origin + window.location.pathname;
     const shareParams = new URLSearchParams();
     shareParams.set('q', initialQuery);
@@ -252,7 +275,7 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, initialResultId, onSearch
                 {exampleTerms.map(term => (
                    <button 
                      key={term} 
-                     onClick={() => { setQuery(term); onSearch(term); }}
+                     onClick={() => { setQuery(term); onSearch(term); analytics.trackEvent('search_performed', { query: term, type: 'example' }); }}
                      className="px-3 md:px-4 py-1.5 bg-[#2d2d3f]/40 hover:bg-[#3b82f6]/20 border border-[#2d2d3f] hover:border-blue-500/50 rounded-full text-[10px] md:text-[11px] text-slate-400 hover:text-blue-400 transition-all flex items-center gap-1.5 whitespace-nowrap"
                    >
                      <Clock size={12} className="text-slate-600 shrink-0" /> {term}

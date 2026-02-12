@@ -4,6 +4,7 @@ import TryTab from './components/TryTab';
 import RulesTab from './components/RulesTab';
 import LearnTab from './components/LearnTab';
 import { Search, Info, ShieldCheck } from 'lucide-react';
+import { analytics } from './services/analytics';
 
 const App: React.FC = () => {
   const [route, setRoute] = useState<RouteState>({ tab: AppTab.TRY, query: '' });
@@ -21,6 +22,9 @@ const App: React.FC = () => {
     const resultId = params.get('id') || undefined;
 
     setRoute({ tab, query, resultId });
+    
+    // Track page/tab view
+    analytics.trackEvent('tab_view', { tab_name: tab });
   }, []);
 
   useEffect(() => {
