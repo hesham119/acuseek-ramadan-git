@@ -11,6 +11,35 @@ interface TryTabProps {
 }
 
 /**
+ * Levenshtein distance utility for fuzzy matching
+ */
+const getLevenshteinDistance = (a: string, b: string): number => {
+  const matrix = Array.from({ length: a.length + 1 }, () => 
+    Array.from({ length: b.length + 1 }, (_, i) => i)
+  );
+  for (let i = 0; i <= a.length; i++) matrix[i][0] = i;
+
+  for (let i = 1; i <= a.length; i++) {
+    for (let j = 1; j <= b.length; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      matrix[i][j] = Math.min(
+        matrix[i - 1][j] + 1,
+        matrix[i][j - 1] + 1,
+        matrix[i - 1][j - 1] + cost
+      );
+    }
+  }
+  return matrix[a.length][b.length];
+};
+
+const getSimilarity = (s1: string, s2: string): number => {
+  const longer = s1.length > s2.length ? s1 : s2;
+  const shorter = s1.length > s2.length ? s2 : s1;
+  if (longer.length === 0) return 1.0;
+  return (longer.length - getLevenshteinDistance(longer, shorter)) / longer.length;
+};
+
+/**
  * Basic NLP utility to clean and normalize search terms
  */
 const normalizeTerm = (term: string): string => {
@@ -53,26 +82,45 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, initialResultId, onSearch
         // 1. Check for exact phrase match (Highest Priority)
         const exactPhraseMatch = resTags.some(tag => tag === rawQuery) || resCamera.includes(rawQuery);
         
-        // 2. Semantic Token Match
+        // 2. Semantic Token Match with Fuzzy Support
         let matchPoints = 0;
+        let highestSimAcrossTokens = 0;
+
         normalizedTokens.forEach(token => {
-          // Does the token match or partially match any tag?
-          const tagMatch = resTags.some(tag => {
-             const normTag = normalizeTerm(tag);
-             return normTag.includes(token) || token.includes(normTag);
+          let tokenMaxSim = 0;
+
+          resTags.forEach(tag => {
+            const normTag = normalizeTerm(tag);
+            
+            // Substring match
+            if (normTag.includes(token) || token.includes(normTag)) {
+              tokenMaxSim = Math.max(tokenMaxSim, 1.0);
+            } else {
+              // Fuzzy match for transliterations like Mesaharaty/Musaharati
+              const fuzzySim = getSimilarity(token, normTag);
+              if (fuzzySim > 0.65) { // Threshold for a "good" fuzzy match
+                tokenMaxSim = Math.max(tokenMaxSim, fuzzySim);
+              }
+            }
           });
 
-          // Does the token appear in the camera name?
-          const camMatch = resCamera.includes(token);
+          // Camera name match
+          if (resCamera.includes(token)) {
+            tokenMaxSim = Math.max(tokenMaxSim, 0.8);
+          }
 
-          if (tagMatch) matchPoints += 2;
-          if (camMatch) matchPoints += 1;
+          matchPoints += tokenMaxSim * 2;
+          highestSimAcrossTokens = Math.max(highestSimAcrossTokens, tokenMaxSim);
         });
 
         // 3. Calculate Score
         const coverage = searchTokens.length > 0 ? (matchPoints / (searchTokens.length * 2)) : 0;
-        let finalScore = exactPhraseMatch ? 100 : Math.min(100, (res.score * 0.5) + (coverage * 50));
-        if (!exactPhraseMatch && matchPoints === 0) finalScore = 0;
+        let finalScore = exactPhraseMatch ? 100 : Math.min(100, (res.score * 0.3) + (coverage * 70));
+        
+        // Fallback for very close fuzzy matches if no other criteria met
+        if (!exactPhraseMatch && highestSimAcrossTokens < 0.65 && matchPoints === 0) {
+           finalScore = 0;
+        }
 
         return { 
           ...res, 
@@ -136,7 +184,7 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, initialResultId, onSearch
     setImageErrors(prev => ({ ...prev, [id]: true }));
   };
 
-  const exampleTerms = ['dates', 'iftar', 'kids playing', 'festive lanterns'];
+  const exampleTerms = ['dates', 'iftar', 'mesaharaty', 'festive lanterns'];
 
   if (!initialQuery) {
     return (
@@ -157,7 +205,7 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, initialResultId, onSearch
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Describe what happened... e.g. 'kids playing with lanterns'"
+              placeholder="Describe what happened... e.g. 'musaharati walking in the street'"
               className={`w-full h-12 md:h-16 px-6 sm:pr-40 rounded-2xl sm:rounded-full border ${error ? 'border-red-500' : 'border-[#2d2d3f]'} bg-[#11111a] text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all text-sm md:text-base shadow-2xl placeholder:text-slate-600`}
             />
             <button
