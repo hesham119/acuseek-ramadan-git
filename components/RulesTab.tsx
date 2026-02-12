@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { Camera, Share2, Globe, Sparkles, UserX } from 'lucide-react';
+import { Camera, Share2, Globe, Sparkles, UserX, Gift } from 'lucide-react';
 
 const RulesTab: React.FC = () => {
   const steps = [
@@ -11,8 +10,8 @@ const RulesTab: React.FC = () => {
     },
     {
       icon: <Share2 size={24} className="text-blue-500" />,
-      title: "2. Share your result",
-      description: "Click the Facebook share button to post your most relevant finding to your feed."
+      title: "2. Share & Tag",
+      description: "Click the Facebook share button and tag @hikvision.mea1 in your post caption."
     },
     {
       icon: <Globe size={24} className="text-blue-500" />,
@@ -43,14 +42,14 @@ const RulesTab: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="bg-[#11111a] rounded-2xl p-8 border border-[#2d2d3f]">
           <div className="flex items-center gap-3 mb-6">
-            <Sparkles className="text-amber-500" size={20} />
+            <Gift className="text-amber-500" size={20} />
             <h3 className="text-base font-bold text-white">Selection Criteria</h3>
           </div>
           <ul className="space-y-4">
             {[
-              { t: 'Relevance', d: 'Accuracy of search input vs visual result.' },
-              { t: 'Creativity', d: 'Unique descriptive terms and found moments.' },
-              { t: 'Clarity', d: 'Clear search phrasing.' }
+              { t: 'Weekly Lucky Draw', d: 'Winners will be selected via a lucky draw conducted each week from all eligible entries.' },
+              { t: 'Correct Tagging', d: 'Your post must successfully tag @hikvision.mea1 to be qualified for the draw.' },
+              { t: 'Public Visibility', d: 'Only public posts can be tracked and entered into the weekly selection.' }
             ].map(item => (
               <li key={item.t} className="flex items-start gap-4">
                 <div className="w-5 h-5 rounded bg-blue-500/20 text-blue-500 flex items-center justify-center text-[10px] font-bold shrink-0">✓</div>
