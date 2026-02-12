@@ -26,7 +26,7 @@ const STOP_WORDS = new Set(['a', 'an', 'the', 'is', 'are', 'doing', 'with', 'som
 
 const TryTab: React.FC<TryTabProps> = ({ initialQuery, initialResultId, onSearch, onSelectResult }) => {
   const [query, setQuery] = useState(initialQuery);
-  const [similarity, setSimilarity] = useState(40); // Slightly lower default for more flexibility
+  const [similarity, setSimilarity] = useState(40); // Default similarity threshold
   const [selectedResult, setSelectedResult] = useState<SearchResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
@@ -70,31 +70,24 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, initialResultId, onSearch
         });
 
         // 3. Calculate Score
-        // Base match strength relative to query length
         const coverage = searchTokens.length > 0 ? (matchPoints / (searchTokens.length * 2)) : 0;
-        
-        // Combine metadata confidence (res.score) with search relevance (coverage)
         let finalScore = exactPhraseMatch ? 100 : Math.min(100, (res.score * 0.5) + (coverage * 50));
-        
-        // If we found NO matches at all, ensure score is 0
         if (!exactPhraseMatch && matchPoints === 0) finalScore = 0;
 
         return { 
           ...res, 
           displayScore: Math.round(finalScore),
-          matchStrength: matchPoints // Used for sorting
+          matchStrength: matchPoints 
         };
       })
       .filter(res => (res.displayScore ?? 0) >= similarity)
       .sort((a, b) => {
-        // Sort by display score first, then by the original AI score
         return (b.displayScore ?? 0) - (a.displayScore ?? 0) || b.score - a.score;
       });
   }, [initialQuery, similarity]);
 
   useEffect(() => {
     if (filteredResults.length > 0) {
-      // If we have an initialResultId from URL, try to find and select it first
       if (initialResultId) {
         const resultFromUrl = filteredResults.find(r => r.id === initialResultId);
         if (resultFromUrl) {
@@ -129,21 +122,13 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, initialResultId, onSearch
 
   const handleShare = () => {
     if (!selectedResult) return;
-
-    // We include the query and selected ID in the shared URL
-    // So when someone clicks it, the app restores the same view
     const baseUrl = window.location.origin + window.location.pathname;
     const shareParams = new URLSearchParams();
     shareParams.set('q', initialQuery);
     shareParams.set('id', selectedResult.id);
-    
-    // Construct the full URL with hash-based parameters
     const fullUrl = `${baseUrl}#try?${shareParams.toString()}`;
-
-    // Note: Facebook Sharer primarily relies on static meta tags from index.html.
     const quoteText = `I found a special Ramadan moment! AcuSeek Ramadan Challenge: Find Ramadan moments and win prizes.`;
     const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(fullUrl)}&quote=${encodeURIComponent(quoteText)}`;
-    
     window.open(fbUrl, '_blank', 'width=600,height=400');
   };
 
@@ -226,7 +211,7 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, initialResultId, onSearch
          </div>
          <button 
             onClick={handleSearchSubmit}
-            className="w-full md:w-auto px-10 h-10 md:h-11 bg-gradient-to-r from-[#9b67f1] to-[#3476f1] hover:from-[#a87df2] hover:to-[#4a84f2] text-white font-medium rounded-xl transition-all shadow-md shrink-0 text-sm"
+            className="w-full px-10 h-10 md:h-11 bg-gradient-to-r from-[#9b67f1] to-[#3476f1] hover:from-[#a87df2] hover:to-[#4a84f2] text-white font-medium rounded-xl transition-all shadow-md shrink-0 text-sm"
          >
            Search
          </button>
@@ -238,16 +223,19 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, initialResultId, onSearch
           <span className="text-[10px] md:text-xs font-medium text-slate-400 shrink-0">Similarity Threshold</span>
           <input
             type="range"
-            min="0"
+            min="1"
             max="100"
             value={similarity}
-            onChange={(e) => setSimilarity(parseInt(e.target.value))}
+            onChange={(e) => {
+              const val = parseInt(e.target.value);
+              setSimilarity(val < 1 ? 1 : val);
+            }}
             className="flex-grow accent-blue-500 h-1 bg-[#2d2d3f] rounded-lg cursor-pointer"
           />
-          <span className="text-[10px] md:text-xs font-bold text-blue-500 w-8 text-right">{similarity}%</span>
+          <span className="text-[10px] md:text-xs font-bold text-blue-500 w-8 text-right">{Math.max(1, similarity)}%</span>
         </div>
         <div className="text-[9px] md:text-[10px] text-slate-500 font-black uppercase tracking-widest mt-3">
-          DeepInMind Search results: {filteredResults.length} matches
+          DEEPINMIND SEARCH RESULTS: {filteredResults.length} MATCHES
         </div>
       </div>
 
@@ -370,7 +358,7 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, initialResultId, onSearch
           </div>
           <h3 className="text-sm md:text-base font-bold text-slate-300 mb-2">No results found</h3>
           <p className="text-slate-500 text-[10px] md:text-xs max-w-xs mx-auto leading-relaxed">
-            Try describing scenes like "kids playing with lanterns" or "someone praying in the hall".
+            Try describing scenes like "kids playing with lanterns" or "family iftar table".
           </p>
         </div>
       )}
