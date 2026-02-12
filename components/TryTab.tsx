@@ -151,17 +151,17 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, initialResultId, onSearch
     setImageErrors(prev => ({ ...prev, [id]: true }));
   };
 
-  const exampleTerms = ['dates', 'iftar', 'someone praying', 'kids playing', 'festive lanterns'];
+  const exampleTerms = ['dates', 'iftar', 'kids playing', 'festive lanterns'];
 
   if (!initialQuery) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[70vh] animate-in fade-in duration-500 px-4">
-        <div className="flex flex-col items-center mb-8 md:mb-12">
+        <div className="flex flex-col items-center mb-10 md:mb-16">
            <div className="mb-2">
               <img 
                 src="https://i.imgur.com/9xOewfs.png" 
                 alt="Hikvision AcuSeek Logo" 
-                className="w-32 h-auto md:w-64 object-contain"
+                className="w-48 h-auto md:w-[480px] object-contain"
               />
            </div>
         </div>
@@ -173,11 +173,11 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, initialResultId, onSearch
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Describe what happened... e.g. 'kids playing with lanterns'"
-              className={`w-full h-12 md:h-14 px-6 sm:pr-32 rounded-2xl sm:rounded-full border ${error ? 'border-red-500' : 'border-[#2d2d3f]'} bg-[#11111a] text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all text-sm shadow-2xl placeholder:text-slate-600`}
+              className={`w-full h-12 md:h-16 px-6 sm:pr-40 rounded-2xl sm:rounded-full border ${error ? 'border-red-500' : 'border-[#2d2d3f]'} bg-[#11111a] text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all text-sm md:text-base shadow-2xl placeholder:text-slate-600`}
             />
             <button
               type="submit"
-              className="sm:absolute sm:right-1 sm:top-1 sm:bottom-1 px-8 py-3 sm:py-0 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl sm:rounded-full transition-all shadow-md active:scale-95 text-sm"
+              className="sm:absolute sm:right-1.5 sm:top-1.5 sm:bottom-1.5 px-10 py-3 sm:py-0 bg-gradient-to-r from-[#9b67f1] to-[#3476f1] hover:from-[#a87df2] hover:to-[#4a84f2] text-white font-medium rounded-full transition-all shadow-lg active:scale-95 text-base md:text-lg"
             >
               Search
             </button>
@@ -226,7 +226,7 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, initialResultId, onSearch
          </div>
          <button 
             onClick={handleSearchSubmit}
-            className="w-full md:w-auto px-6 h-10 md:h-11 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-all shadow-md shrink-0 text-sm"
+            className="w-full md:w-auto px-10 h-10 md:h-11 bg-gradient-to-r from-[#9b67f1] to-[#3476f1] hover:from-[#a87df2] hover:to-[#4a84f2] text-white font-medium rounded-xl transition-all shadow-md shrink-0 text-sm"
          >
            Search
          </button>
