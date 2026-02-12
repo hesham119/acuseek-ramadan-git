@@ -8,9 +8,23 @@ interface TryTabProps {
   onSearch: (query: string) => void;
 }
 
+/**
+ * Basic NLP utility to clean and normalize search terms
+ */
+const normalizeTerm = (term: string): string => {
+  return term
+    .toLowerCase()
+    .trim()
+    .replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, "")
+    // Simple stemming: remove common suffixes to find the root
+    .replace(/(ing|ers|ed|es|s)$/, "");
+};
+
+const STOP_WORDS = new Set(['a', 'an', 'the', 'is', 'are', 'doing', 'with', 'some', 'someone', 'people', 'and', 'in', 'at', 'on', 'of', 'for']);
+
 const TryTab: React.FC<TryTabProps> = ({ initialQuery, onSearch }) => {
   const [query, setQuery] = useState(initialQuery);
-  const [similarity, setSimilarity] = useState(50);
+  const [similarity, setSimilarity] = useState(40); // Slightly lower default for more flexibility
   const [selectedResult, setSelectedResult] = useState<SearchResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
@@ -22,37 +36,60 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, onSearch }) => {
   const filteredResults = useMemo(() => {
     if (!initialQuery) return [];
     
-    const normalizedQuery = initialQuery.toLowerCase().trim();
-    const searchWords = normalizedQuery
-      .replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, "")
+    const rawQuery = initialQuery.toLowerCase().trim();
+    const searchTokens = rawQuery
       .split(/\s+/)
-      .filter(word => word.length >= 2);
+      .filter(word => word.length >= 2 && !STOP_WORDS.has(word));
+
+    const normalizedTokens = searchTokens.map(normalizeTerm);
 
     return STATIC_RESULTS
       .map(res => {
-        const exactPhraseMatch = res.tags.some(tag => tag.toLowerCase() === normalizedQuery);
+        const resTags = res.tags.map(t => t.toLowerCase());
+        const resCamera = res.camera.toLowerCase();
         
-        const matchCount = searchWords.filter(word => 
-          res.tags.some(tag => tag.toLowerCase().includes(word)) ||
-          res.camera.toLowerCase().includes(word)
-        ).length;
+        // 1. Check for exact phrase match (Highest Priority)
+        const exactPhraseMatch = resTags.some(tag => tag === rawQuery) || resCamera.includes(rawQuery);
+        
+        // 2. Semantic Token Match
+        let matchPoints = 0;
+        normalizedTokens.forEach(token => {
+          // Does the token match or partially match any tag?
+          const tagMatch = resTags.some(tag => {
+             const normTag = normalizeTerm(tag);
+             return normTag.includes(token) || token.includes(normTag);
+          });
 
-        const matchStrength = searchWords.length > 0 ? (matchCount / searchWords.length) : 0;
-        let adjustedScore = Math.min(100, res.score * (0.7 + (matchStrength * 0.3)));
+          // Does the token appear in the camera name?
+          const camMatch = resCamera.includes(token);
+
+          if (tagMatch) matchPoints += 2;
+          if (camMatch) matchPoints += 1;
+        });
+
+        // 3. Calculate Score
+        // Base match strength relative to query length
+        const coverage = searchTokens.length > 0 ? (matchPoints / (searchTokens.length * 2)) : 0;
         
-        if (exactPhraseMatch) adjustedScore = 100;
+        // Combine metadata confidence (res.score) with search relevance (coverage)
+        let finalScore = exactPhraseMatch ? 100 : Math.min(100, (res.score * 0.5) + (coverage * 50));
+        
+        // If we found NO matches at all, ensure score is 0
+        if (!exactPhraseMatch && matchPoints === 0) finalScore = 0;
 
         return { 
           ...res, 
-          currentMatchScore: exactPhraseMatch ? 100 : matchCount, 
-          displayScore: Math.round(adjustedScore) 
-        } as SearchResult;
+          displayScore: Math.round(finalScore),
+          matchStrength: matchPoints // Used for sorting
+        };
       })
-      .filter(res => (res.displayScore ?? 0) >= similarity && (searchWords.length === 0 || (res.currentMatchScore ?? 0) > 0))
-      .sort((a, b) => (b.currentMatchScore ?? 0) - (a.currentMatchScore ?? 0) || (b.displayScore ?? 0) - (a.displayScore ?? 0));
+      .filter(res => (res.displayScore ?? 0) >= similarity)
+      .sort((a, b) => {
+        // Sort by display score first, then by the original AI score
+        return (b.displayScore ?? 0) - (a.displayScore ?? 0) || b.score - a.score;
+      });
   }, [initialQuery, similarity]);
 
-  // Auto-select first result when search results change
   useEffect(() => {
     if (filteredResults.length > 0) {
       const isStillInList = filteredResults.some(r => r.id === selectedResult?.id);
@@ -84,7 +121,7 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, onSearch }) => {
     setImageErrors(prev => ({ ...prev, [id]: true }));
   };
 
-  const exampleTerms = ['dates', 'iftar', 'prayer mat'];
+  const exampleTerms = ['dates', 'iftar', 'someone praying', 'kids playing', 'festive lanterns'];
 
   if (!initialQuery) {
     return (
@@ -99,16 +136,16 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, onSearch }) => {
            <h1 className="text-3xl md:text-4xl font-bold mt-4 tracking-wider flex">
               <span className="text-white">Acu</span><span className="text-blue-500">Seek</span>
            </h1>
-           <p className="text-slate-500 text-[10px] md:text-xs mt-2 font-medium tracking-tight uppercase">Video Content Search</p>
+           <p className="text-slate-500 text-[10px] md:text-xs mt-2 font-medium tracking-tight uppercase">Open Natural Language Search</p>
         </div>
 
         <div className="w-full max-w-4xl">
-          <form onSubmit={handleSearchSubmit} className="flex flex-col sm:relative group mb-6 gap-3 sm:gap-0">
+          <form onSubmit={handleSearchSubmit} className="flex flex-col sm:relative group mb-8 gap-3 sm:gap-0">
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Type what you remember... e.g. 'dates'"
+              placeholder="Describe what happened... e.g. 'kids playing with lanterns'"
               className={`w-full h-12 md:h-14 px-6 sm:pr-32 rounded-2xl sm:rounded-full border ${error ? 'border-red-500' : 'border-[#2d2d3f]'} bg-[#11111a] text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all text-sm shadow-2xl placeholder:text-slate-600`}
             />
             <button
@@ -120,7 +157,8 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, onSearch }) => {
             {error && <p className="text-red-500 text-[10px] mt-2 ml-4 sm:absolute sm:top-full">{error}</p>}
           </form>
 
-          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 px-2">
+          <div className="flex flex-col items-center justify-center gap-3">
+             <div className="text-[10px] uppercase tracking-[0.2em] font-black text-slate-600">Sample Queries</div>
              <div className="flex flex-wrap justify-center gap-2">
                 {exampleTerms.map(term => (
                    <button 
@@ -170,7 +208,7 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, onSearch }) => {
       <div className="flex flex-col mb-6 md:mb-8 bg-[#11111a] p-4 rounded-xl border border-[#2d2d3f]">
         <div className="flex items-center gap-4 w-full">
           <SlidersHorizontal size={16} className="text-slate-500 shrink-0" />
-          <span className="text-[10px] md:text-xs font-medium text-slate-400 shrink-0">Similarity</span>
+          <span className="text-[10px] md:text-xs font-medium text-slate-400 shrink-0">Similarity Threshold</span>
           <input
             type="range"
             min="0"
@@ -182,7 +220,7 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, onSearch }) => {
           <span className="text-[10px] md:text-xs font-bold text-blue-500 w-8 text-right">{similarity}%</span>
         </div>
         <div className="text-[9px] md:text-[10px] text-slate-500 font-black uppercase tracking-widest mt-3">
-          Found {filteredResults.length} matches
+          DeepInMind Search results: {filteredResults.length} matches
         </div>
       </div>
 
@@ -225,7 +263,7 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, onSearch }) => {
             ))}
           </div>
 
-          {/* Large Preview Sidebar - THE MAIN FIX AREA */}
+          {/* Large Preview Sidebar */}
           <div className="space-y-4 order-1 min-[1100px]:order-2">
             <div className="min-[1100px]:sticky min-[1100px]:top-24 bg-[#11111a] rounded-2xl p-4 shadow-2xl border border-[#2d2d3f] overflow-hidden">
               <div className="aspect-video relative rounded-lg overflow-hidden mb-4 bg-slate-900 border border-[#2d2d3f] flex items-center justify-center">
@@ -266,7 +304,7 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, onSearch }) => {
                       <div className="text-[10px] md:text-xs font-semibold text-slate-300 tracking-tighter">00:00:05.12</div>
                     </div>
                     <div className="p-2 md:p-3 bg-[#2d2d3f]/40 rounded-lg border border-[#2d2d3f]">
-                      <div className="text-[8px] md:text-[9px] font-bold uppercase text-slate-500 mb-1">Score</div>
+                      <div className="text-[8px] md:text-[9px] font-bold uppercase text-slate-500 mb-1">Confidence</div>
                       <div className="text-[10px] md:text-xs font-semibold text-blue-500">{selectedResult.displayScore}% Sim.</div>
                     </div>
                   </div>
@@ -305,14 +343,14 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, onSearch }) => {
           </div>
           <h3 className="text-sm md:text-base font-bold text-slate-300 mb-2">No results found</h3>
           <p className="text-slate-500 text-[10px] md:text-xs max-w-xs mx-auto leading-relaxed">
-            Try searching for "dates", "iftar", or "prayer mat".
+            Try describing scenes like "kids playing with lanterns" or "someone praying in the hall".
           </p>
         </div>
       )}
 
       <div className="mt-8 md:mt-12 p-4 rounded-lg bg-[#11111a]/30 border border-[#2d2d3f] text-center">
          <p className="text-[9px] md:text-[10px] text-slate-600 italic">
-           “This is a simulated demo for the AcuSeek Challenge. Results are based on sample video metadata.”
+           These results are simulated and shown for illustrative purposes only.
          </p>
       </div>
     </div>
