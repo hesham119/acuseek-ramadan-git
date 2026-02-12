@@ -11,6 +11,22 @@ interface TryTabProps {
 }
 
 /**
+ * Semantic Synonyms for Ramadan Context
+ */
+const SYNONYMS: Record<string, string[]> = {
+  'mosque': ['masjid', 'masjed', 'jamaa', 'mosk'],
+  'masjid': ['mosque', 'masjed', 'jamaa'],
+  'lantern': ['fanoos', 'fanous', 'fanus', 'lamp', 'light'],
+  'fanoos': ['lantern', 'fanous', 'fanus'],
+  'fanous': ['lantern', 'fanoos', 'fanus'],
+  'sweets': ['dessert', 'baklava', 'baklawa', 'treats', 'sweet'],
+  'drummer': ['mesaharaty', 'musaharaty', 'mesaharati', 'musaharati', 'suhoor caller'],
+  'mesaharaty': ['drummer', 'musaharaty', 'suhoor caller'],
+  'dates': ['tamr', 'fruit', 'breaking fast'],
+  'iftar': ['dinner', 'breaking fast', 'fasting', 'gathering']
+};
+
+/**
  * Levenshtein distance utility for fuzzy matching
  */
 const getLevenshteinDistance = (a: string, b: string): number => {
@@ -47,15 +63,15 @@ const normalizeTerm = (term: string): string => {
     .toLowerCase()
     .trim()
     .replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, "")
-    // Simple stemming: remove common suffixes to find the root
-    .replace(/(ing|ers|ed|es|s)$/, "");
+    // Stemming: remove common pluralization
+    .replace(/(s)$/, "");
 };
 
 const STOP_WORDS = new Set(['a', 'an', 'the', 'is', 'are', 'doing', 'with', 'some', 'someone', 'people', 'and', 'in', 'at', 'on', 'of', 'for']);
 
 const TryTab: React.FC<TryTabProps> = ({ initialQuery, initialResultId, onSearch, onSelectResult }) => {
   const [query, setQuery] = useState(initialQuery);
-  const [similarity, setSimilarity] = useState(40); // Default similarity threshold
+  const [similarity, setSimilarity] = useState(50); 
   const [selectedResult, setSelectedResult] = useState<SearchResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
@@ -82,25 +98,39 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, initialResultId, onSearch
         // 1. Check for exact phrase match (Highest Priority)
         const exactPhraseMatch = resTags.some(tag => tag === rawQuery) || resCamera.includes(rawQuery);
         
-        // 2. Semantic Token Match with Fuzzy Support
+        // 2. Semantic Token Match with Tiered Fuzzy & Synonym Support
         let matchPoints = 0;
         let highestSimAcrossTokens = 0;
 
         normalizedTokens.forEach(token => {
           let tokenMaxSim = 0;
+          const synonyms = SYNONYMS[token] || [];
 
           resTags.forEach(tag => {
             const normTag = normalizeTerm(tag);
             
-            // Substring match
-            if (normTag.includes(token) || token.includes(normTag)) {
-              tokenMaxSim = Math.max(tokenMaxSim, 1.0);
+            // Check Synonyms First (Semantic Link)
+            const isSynonym = synonyms.some(syn => normalizeTerm(syn) === normTag);
+            if (isSynonym) {
+                tokenMaxSim = Math.max(tokenMaxSim, 0.95); // High confidence for synonyms
+            }
+
+            // Exact or Substring match
+            if (normTag === token || tag.toLowerCase() === token) {
+                tokenMaxSim = Math.max(tokenMaxSim, 1.0);
+            } else if (normTag.includes(token) && token.length > 3) {
+                tokenMaxSim = Math.max(tokenMaxSim, 0.9);
             } else {
-              // Fuzzy match for transliterations like Mesaharaty/Musaharati
-              const fuzzySim = getSimilarity(token, normTag);
-              if (fuzzySim > 0.65) { // Threshold for a "good" fuzzy match
-                tokenMaxSim = Math.max(tokenMaxSim, fuzzySim);
-              }
+                // Tiered Fuzzy Thresholding
+                const fuzzySim = getSimilarity(token, normTag);
+                let minThreshold = 0.70; // Default for long words
+                
+                if (token.length <= 5) minThreshold = 0.90; // Strict for "sweet", "gift", "box"
+                else if (token.length <= 7) minThreshold = 0.85; // Medium for "mosque", "street", "iftar"
+                
+                if (fuzzySim >= minThreshold) {
+                  tokenMaxSim = Math.max(tokenMaxSim, fuzzySim);
+                }
             }
           });
 
@@ -115,17 +145,16 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, initialResultId, onSearch
 
         // 3. Calculate Score
         const coverage = searchTokens.length > 0 ? (matchPoints / (searchTokens.length * 2)) : 0;
-        let finalScore = exactPhraseMatch ? 100 : Math.min(100, (res.score * 0.3) + (coverage * 70));
+        let finalScore = exactPhraseMatch ? 100 : Math.min(100, (res.score * 0.15) + (coverage * 85));
         
-        // Fallback for very close fuzzy matches if no other criteria met
-        if (!exactPhraseMatch && highestSimAcrossTokens < 0.65 && matchPoints === 0) {
+        // Filter out very weak matches
+        if (!exactPhraseMatch && highestSimAcrossTokens < 0.7 && matchPoints < 1) {
            finalScore = 0;
         }
 
         return { 
           ...res, 
-          displayScore: Math.round(finalScore),
-          matchStrength: matchPoints 
+          displayScore: Math.round(finalScore)
         };
       })
       .filter(res => (res.displayScore ?? 0) >= similarity)
@@ -184,7 +213,7 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, initialResultId, onSearch
     setImageErrors(prev => ({ ...prev, [id]: true }));
   };
 
-  const exampleTerms = ['dates', 'iftar', 'mesaharaty', 'festive lanterns'];
+  const exampleTerms = ['dates', 'iftar', 'mosque at night', 'mesaharaty', 'crescent moon lights'];
 
   if (!initialQuery) {
     return (
@@ -205,7 +234,7 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, initialResultId, onSearch
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Describe what happened... e.g. 'musaharati walking in the street'"
+              placeholder="Describe what happened... e.g. 'grand mosque entrance with decorations'"
               className={`w-full h-12 md:h-16 px-6 sm:pr-40 rounded-2xl sm:rounded-full border ${error ? 'border-red-500' : 'border-[#2d2d3f]'} bg-[#11111a] text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all text-sm md:text-base shadow-2xl placeholder:text-slate-600`}
             />
             <button

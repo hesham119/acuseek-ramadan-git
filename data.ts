@@ -18,6 +18,10 @@ const DRUMMER_ALLEY_URL = 'https://videos.openai.com/az/vg-assets/task_01kh8xa1a
 
 const DRUMMER_FESTIVE_URL = 'https://videos.openai.com/az/vg-assets/task_01kh8x69freeprbs4qfbe75bcn%2F1770899341_img_1.webp?se=2026-02-18T00%3A00%3A00Z&sp=r&sv=2026-02-06&sr=b&skoid=cfbc986b-d2bc-4088-8b71-4f962129715b&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-02-12T12%3A15%3A03Z&ske=2026-02-19T12%3A20%3A03Z&sks=b&skv=2026-02-06&sig=QYwakAuHPgYJVGIU8RvhoU5wlB4JPiggXlSEMHntN08%3D&ac=oaivgprodscus2';
 
+const MOSQUE_COURTYARD_URL = 'https://videos.openai.com/az/vg-assets/task_01kh8yarkper09ex8ckj3twb9j%2F1770900539_img_0.webp?se=2026-02-18T00%3A00%3A00Z&sp=r&sv=2026-02-06&sr=b&skoid=cfbc986b-d2bc-4088-8b71-4f962129715b&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-02-12T12%3A15%3A03Z&ske=2026-02-19T12%3A20%3A03Z&sks=b&skv=2026-02-06&sig=JpjjvpR4EVgRI2aSpiIVinLSz%2Bjd/MnORxZc9dCvtQY%3D&ac=oaivgprodscus2';
+
+const MOSQUE_ENTRANCE_URL = 'https://videos.openai.com/az/vg-assets/task_01kh8y6wdwe4dtgj3zm7wp454p%2F1770900410_img_0.webp?se=2026-02-18T00%3A00%3A00Z&sp=r&sv=2026-02-06&sr=b&skoid=cfbc986b-d2bc-4088-8b71-4f962129715b&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-02-12T12%3A15%3A03Z&ske=2026-02-19T12%3A20%3A03Z&sks=b&skv=2026-02-06&sig=4EA/voNvFE9Fe8uFKER6/ht5INPGiOGScwEz7TNl%2BEw%3D&ac=oaivgprodscus2';
+
 export const STATIC_RESULTS: SearchResult[] = [
   {
     id: '1',
@@ -122,6 +126,38 @@ export const STATIC_RESULTS: SearchResult[] = [
       'Festive street drummer at night',
       'drum', 'drummer', 'lights', 'banners', 'festive', 'street', 'night', 'decorations', 'suhoor', 
       'mesaharaty', 'musaharaty', 'mesaharati', 'musaharati', 'masaharaty', 'masaharati', 'mousaharaty', 'mousaharati', 'misaharaty', 'misaharati'
+    ]
+  },
+  {
+    id: '12',
+    thumbnail: MOSQUE_COURTYARD_URL,
+    preview: MOSQUE_COURTYARD_URL,
+    camera: 'Mosque Courtyard - Cam 04',
+    timestamp: '2021-03-28 04:35:17',
+    score: 100,
+    tags: [
+      'Mosque courtyard at night with festive lights',
+      'Crescent moon and star light decoration',
+      'Colorful banners and pennants hanging near mosque',
+      'Traditional lanterns and fairy lights in courtyard',
+      'People walking in mosque plaza at night',
+      'mosque', 'courtyard', 'crescent', 'moon', 'star', 'lights', 'banners', 'night', 'people', 'plaza', 'fanoos', 'lantern', 'festive'
+    ]
+  },
+  {
+    id: '13',
+    thumbnail: MOSQUE_ENTRANCE_URL,
+    preview: MOSQUE_ENTRANCE_URL,
+    camera: 'Mosque Entrance - Cam 09',
+    timestamp: '2024-03-29 20:15:00',
+    score: 100,
+    tags: [
+      'Grand mosque entrance at night',
+      'Festive Ramadan decorations at the mosque',
+      'Hanging lanterns and crescent lights over mosque entrance',
+      'Ramadan night celebration at the masjid',
+      'Traditional lighting banners across the plaza',
+      'mosque', 'masjid', 'entrance', 'lights', 'decorations', 'plaza', 'night', 'celebration', 'festive', 'lantern', 'crescent'
     ]
   }
 ];
