@@ -141,8 +141,6 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, initialResultId, onSearch
     const fullUrl = `${baseUrl}#try?${shareParams.toString()}`;
 
     // Note: Facebook Sharer primarily relies on static meta tags from index.html.
-    // However, we pass the title and description via the URL's og: properties if the crawler can find them,
-    // and provide the quote parameter as a fallback for the post caption.
     const quoteText = `I found a special Ramadan moment! AcuSeek Ramadan Challenge: Find Ramadan moments and win prizes.`;
     const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(fullUrl)}&quote=${encodeURIComponent(quoteText)}`;
     
@@ -159,16 +157,13 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, initialResultId, onSearch
     return (
       <div className="flex flex-col items-center justify-center min-h-[70vh] animate-in fade-in duration-500 px-4">
         <div className="flex flex-col items-center mb-8 md:mb-12">
-           <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-tr from-blue-500 via-purple-600 to-indigo-700 rounded-full flex items-center justify-center shadow-lg relative overflow-hidden group">
-              <div className="absolute inset-1 bg-[#1c1c28] rounded-full flex items-center justify-center overflow-hidden">
-                 <div className="w-full h-full bg-gradient-to-tr from-blue-500/20 to-purple-600/20"></div>
-              </div>
-              <div className="z-10 w-8 h-8 md:w-12 md:h-12 border-4 border-blue-500 rounded-full border-r-transparent rotate-45 group-hover:rotate-[225deg] transition-transform duration-1000"></div>
+           <div className="mb-2">
+              <img 
+                src="https://i.imgur.com/9xOewfs.png" 
+                alt="Hikvision AcuSeek Logo" 
+                className="w-32 h-auto md:w-64 object-contain"
+              />
            </div>
-           <h1 className="text-3xl md:text-4xl font-bold mt-4 tracking-wider flex">
-              <span className="text-white">Acu</span><span className="text-blue-500">Seek</span>
-           </h1>
-           <p className="text-slate-500 text-[10px] md:text-xs mt-2 font-medium tracking-tight uppercase">Open Natural Language Search</p>
         </div>
 
         <div className="w-full max-w-4xl">
