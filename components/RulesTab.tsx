@@ -1,5 +1,5 @@
 import React from 'react';
-import { Camera, Share2, Globe, Sparkles, UserX, Gift } from 'lucide-react';
+import { Camera, Share2, Globe, Gift } from 'lucide-react';
 
 const RulesTab: React.FC = () => {
   const steps = [
@@ -39,7 +39,7 @@ const RulesTab: React.FC = () => {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="max-w-2xl mx-auto">
         <div className="bg-[#11111a] rounded-2xl p-8 border border-[#2d2d3f]">
           <div className="flex items-center gap-3 mb-6">
             <Gift className="text-amber-500" size={20} />
@@ -60,16 +60,6 @@ const RulesTab: React.FC = () => {
               </li>
             ))}
           </ul>
-        </div>
-
-        <div className="bg-red-950/20 rounded-2xl p-8 border border-red-900/30">
-          <div className="flex items-center gap-3 mb-4">
-            <UserX className="text-red-500" size={20} />
-            <h3 className="text-base font-bold text-red-200">Safety Notice</h3>
-          </div>
-          <p className="text-red-300/60 leading-relaxed text-[11px]">
-            This is a simulated challenge environment. <strong>Do not enter real personal information</strong>, private addresses, or sensitive data in the search field.
-          </p>
         </div>
       </div>
     </div>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { AppTab, RouteState } from './types';
 import TryTab from './components/TryTab';
@@ -19,8 +18,9 @@ const App: React.FC = () => {
 
     const params = new URLSearchParams(queryPart || '');
     const query = params.get('q') || '';
+    const resultId = params.get('id') || undefined;
 
-    setRoute({ tab, query });
+    setRoute({ tab, query, resultId });
   }, []);
 
   useEffect(() => {
@@ -29,16 +29,29 @@ const App: React.FC = () => {
     return () => window.removeEventListener('hashchange', parseHash);
   }, [parseHash]);
 
-  const navigateTo = (tab: AppTab, query?: string) => {
+  const navigateTo = (tab: AppTab, query?: string, resultId?: string) => {
     let newHash = `#${tab}`;
-    if (query) newHash += `?q=${encodeURIComponent(query)}`;
+    const params = new URLSearchParams();
+    if (query) params.set('q', query);
+    if (resultId) params.set('id', resultId);
+    
+    const queryString = params.toString();
+    if (queryString) newHash += `?${queryString}`;
+    
     window.location.hash = newHash;
   };
 
   const renderContent = () => {
     switch (route.tab) {
       case AppTab.TRY:
-        return <TryTab initialQuery={route.query} onSearch={(q) => navigateTo(AppTab.TRY, q)} />;
+        return (
+          <TryTab 
+            initialQuery={route.query} 
+            initialResultId={route.resultId}
+            onSearch={(q) => navigateTo(AppTab.TRY, q)} 
+            onSelectResult={(id) => navigateTo(AppTab.TRY, route.query, id)}
+          />
+        );
       case AppTab.RULES:
         return <RulesTab />;
       case AppTab.LEARN:

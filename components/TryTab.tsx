@@ -5,7 +5,9 @@ import { SearchResult } from '../types';
 
 interface TryTabProps {
   initialQuery: string;
+  initialResultId?: string;
   onSearch: (query: string) => void;
+  onSelectResult?: (id: string) => void;
 }
 
 /**
@@ -22,7 +24,7 @@ const normalizeTerm = (term: string): string => {
 
 const STOP_WORDS = new Set(['a', 'an', 'the', 'is', 'are', 'doing', 'with', 'some', 'someone', 'people', 'and', 'in', 'at', 'on', 'of', 'for']);
 
-const TryTab: React.FC<TryTabProps> = ({ initialQuery, onSearch }) => {
+const TryTab: React.FC<TryTabProps> = ({ initialQuery, initialResultId, onSearch, onSelectResult }) => {
   const [query, setQuery] = useState(initialQuery);
   const [similarity, setSimilarity] = useState(40); // Slightly lower default for more flexibility
   const [selectedResult, setSelectedResult] = useState<SearchResult | null>(null);
@@ -92,6 +94,15 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, onSearch }) => {
 
   useEffect(() => {
     if (filteredResults.length > 0) {
+      // If we have an initialResultId from URL, try to find and select it first
+      if (initialResultId) {
+        const resultFromUrl = filteredResults.find(r => r.id === initialResultId);
+        if (resultFromUrl) {
+          setSelectedResult(resultFromUrl);
+          return;
+        }
+      }
+
       const isStillInList = filteredResults.some(r => r.id === selectedResult?.id);
       if (!isStillInList) {
         setSelectedResult(filteredResults[0]);
@@ -99,7 +110,7 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, onSearch }) => {
     } else {
       setSelectedResult(null);
     }
-  }, [filteredResults, selectedResult?.id]);
+  }, [filteredResults, selectedResult?.id, initialResultId]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,10 +122,31 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, onSearch }) => {
     onSearch(query.trim());
   };
 
+  const handleSelectResult = (result: SearchResult) => {
+    setSelectedResult(result);
+    if (onSelectResult) onSelectResult(result.id);
+  };
+
   const handleShare = () => {
-    const url = window.location.href;
-    const shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
-    window.open(shareUrl, '_blank', 'width=600,height=400');
+    if (!selectedResult) return;
+
+    // We include the query and selected ID in the shared URL
+    // So when someone clicks it, the app restores the same view
+    const baseUrl = window.location.origin + window.location.pathname;
+    const shareParams = new URLSearchParams();
+    shareParams.set('q', initialQuery);
+    shareParams.set('id', selectedResult.id);
+    
+    // Construct the full URL with hash-based parameters
+    const fullUrl = `${baseUrl}#try?${shareParams.toString()}`;
+
+    // Note: Facebook Sharer primarily relies on static meta tags from index.html.
+    // However, we pass the title and description via the URL's og: properties if the crawler can find them,
+    // and provide the quote parameter as a fallback for the post caption.
+    const quoteText = `I found a special Ramadan moment! AcuSeek Ramadan Challenge: Find Ramadan moments and win prizes.`;
+    const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(fullUrl)}&quote=${encodeURIComponent(quoteText)}`;
+    
+    window.open(fbUrl, '_blank', 'width=600,height=400');
   };
 
   const handleImageError = (id: string) => {
@@ -231,7 +263,7 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, onSearch }) => {
             {filteredResults.map((result) => (
               <div
                 key={result.id}
-                onClick={() => setSelectedResult(result)}
+                onClick={() => handleSelectResult(result)}
                 className={`group relative rounded-xl overflow-hidden cursor-pointer border-2 transition-all ${
                   selectedResult?.id === result.id ? 'border-blue-500 shadow-xl bg-[#11111a]' : 'border-transparent bg-[#11111a]/40 hover:bg-[#11111a]'
                 }`}

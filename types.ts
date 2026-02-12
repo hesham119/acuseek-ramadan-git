@@ -1,4 +1,3 @@
-
 export interface SearchResult {
   id: string;
   thumbnail: string;
@@ -21,4 +20,5 @@ export enum AppTab {
 export interface RouteState {
   tab: AppTab;
   query: string;
+  resultId?: string;
 }
