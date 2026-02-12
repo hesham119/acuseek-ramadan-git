@@ -30,7 +30,7 @@ export const STATIC_RESULTS: SearchResult[] = [
     camera: 'Dining Hall - Cam 04',
     timestamp: '2024-03-24 18:30:05',
     score: 88,
-    tags: ['dates', 'fruit', 'snack', 'ramadan', 'food', 'breaking fast', 'lantern', 'fanous', 'fanoos', 'fanus', 'ramadan kareem']
+    tags: ['dates', 'fruit', 'snack', 'ramadan', 'food', 'lantern', 'fanous', 'fanoos', 'fanus', 'ramadan kareem']
   },
   {
     id: '2',
