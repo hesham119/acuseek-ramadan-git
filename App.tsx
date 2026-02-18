@@ -3,6 +3,7 @@ import { AppTab, RouteState } from './types';
 import TryTab from './components/TryTab';
 import RulesTab from './components/RulesTab';
 import LearnTab from './components/LearnTab';
+import TermsTab from './components/TermsTab';
 import { Search, Info, ShieldCheck } from 'lucide-react';
 import { analytics } from './services/analytics';
 
@@ -16,6 +17,7 @@ const App: React.FC = () => {
     let tab = AppTab.TRY;
     if (tabPart === 'rules') tab = AppTab.RULES;
     if (tabPart === 'learn') tab = AppTab.LEARN;
+    if (tabPart === 'terms') tab = AppTab.TERMS;
 
     const params = new URLSearchParams(queryPart || '');
     const query = params.get('q') || '';
@@ -60,6 +62,8 @@ const App: React.FC = () => {
         return <RulesTab />;
       case AppTab.LEARN:
         return <LearnTab />;
+      case AppTab.TERMS:
+        return <TermsTab onBack={() => navigateTo(AppTab.TRY, route.query)} />;
       default:
         return <TryTab initialQuery="" onSearch={(q) => navigateTo(AppTab.TRY, q)} />;
     }
@@ -69,12 +73,15 @@ const App: React.FC = () => {
     <div className="flex flex-col min-h-screen bg-[#1c1c28]">
       <header className="bg-[#11111a] border-b border-[#2d2d3f] px-4 md:px-6 py-1 md:py-2 flex items-center justify-between sticky top-0 z-[100]">
         <div className="flex items-center gap-4 md:gap-6 overflow-hidden w-full">
-          <div className="flex items-center gap-2 shrink-0">
+          <button 
+            onClick={() => navigateTo(AppTab.TRY, '')}
+            className="flex items-center gap-2 shrink-0 hover:opacity-80 transition-opacity active:scale-95 text-left"
+          >
              <div className="bg-gradient-to-tr from-blue-500 to-purple-600 w-5 h-5 md:w-6 md:h-6 rounded-md flex items-center justify-center">
                 <span className="text-white text-[8px] md:text-[10px] font-bold">D</span>
              </div>
              <span className="text-slate-300 font-bold text-xs md:text-sm tracking-tight hidden sm:inline">DeepinMind <span className="text-[8px] md:text-[10px] bg-amber-500/20 text-amber-500 px-1 rounded ml-1">Pro</span></span>
-          </div>
+          </button>
           
           <nav className="flex items-center gap-1 overflow-x-auto no-scrollbar whitespace-nowrap">
              <button 

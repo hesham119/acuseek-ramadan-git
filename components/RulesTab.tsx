@@ -20,8 +20,27 @@ const RulesTab: React.FC = () => {
     }
   ];
 
+  const criteria = [
+    { 
+      t: 'Lucky Draw', 
+      d: '10 Winners will be randomly selected by the last week of Ramadan from all eligible entries submitted during the Campaign period.' 
+    },
+    { 
+      t: 'Correct Tagging', 
+      d: 'Posts must correctly tag @hikvision.mea1 to be eligible for the draw.' 
+    },
+    { 
+      t: 'Public Visibility', 
+      d: 'Only publicly visible posts can be tracked and included in the selection.' 
+    },
+    { 
+      t: 'Prize', 
+      d: 'Each selected winner will receive one (1) EZVIZ home camera. The exact model may vary based on availability.' 
+    }
+  ];
+
   return (
-    <div className="max-w-4xl mx-auto animate-in slide-in-from-bottom-4 duration-500 py-10">
+    <div className="max-w-4xl mx-auto animate-in slide-in-from-bottom-4 duration-500 py-10 px-4">
       <div className="text-center mb-12">
         <h1 className="text-3xl font-bold text-white mb-4">Challenge Instructions</h1>
         <p className="text-slate-500 text-sm">Follow these simple steps to enter the AcuSeek Ramadan Challenge.</p>
@@ -40,22 +59,20 @@ const RulesTab: React.FC = () => {
       </div>
 
       <div className="max-w-2xl mx-auto">
-        <div className="bg-[#11111a] rounded-2xl p-8 border border-[#2d2d3f]">
-          <div className="flex items-center gap-3 mb-6">
+        <div className="bg-[#11111a] rounded-2xl p-8 border border-[#2d2d3f] shadow-xl">
+          <div className="flex items-center gap-3 mb-8">
             <Gift className="text-amber-500" size={20} />
-            <h3 className="text-base font-bold text-white">Selection Criteria</h3>
+            <h3 className="text-base font-bold text-white tracking-tight">Selection Criteria</h3>
           </div>
-          <ul className="space-y-4">
-            {[
-              { t: 'Weekly Lucky Draw', d: 'Winners will be selected via a lucky draw conducted each week from all eligible entries.' },
-              { t: 'Correct Tagging', d: 'Your post must successfully tag @hikvision.mea1 to be qualified for the draw.' },
-              { t: 'Public Visibility', d: 'Only public posts can be tracked and entered into the weekly selection.' }
-            ].map(item => (
-              <li key={item.t} className="flex items-start gap-4">
-                <div className="w-5 h-5 rounded bg-blue-500/20 text-blue-500 flex items-center justify-center text-[10px] font-bold shrink-0">✓</div>
+          <ul className="space-y-6">
+            {criteria.map(item => (
+              <li key={item.t} className="flex items-start gap-4 group">
+                <div className="w-5 h-5 rounded bg-blue-500/20 text-blue-500 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">✓</div>
                 <div>
-                  <p className="font-bold text-slate-300 text-xs">{item.t}</p>
-                  <p className="text-slate-500 text-[10px]">{item.d}</p>
+                  <p className="font-bold text-slate-300 text-xs mb-1">{item.t}</p>
+                  <p className="text-slate-500 text-[10px] leading-relaxed group-hover:text-slate-400 transition-colors">
+                    {item.d}
+                  </p>
                 </div>
               </li>
             ))}

@@ -25,7 +25,8 @@ export interface SearchResult {
 export enum AppTab {
   TRY = 'try',
   RULES = 'rules',
-  LEARN = 'learn'
+  LEARN = 'learn',
+  TERMS = 'terms'
 }
 
 export interface RouteState {

@@ -272,9 +272,14 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, initialResultId, onSearch
               <AlertCircle size={32} className="text-blue-500" />
             </div>
             <h2 className="text-xl font-bold text-slate-100 text-center mb-4">AcuSeek Simulation Policy</h2>
-            <p className="text-slate-400 text-sm leading-relaxed text-center mb-8">
-              In real deployments, AcuSeek searches based on detectable visual elements and events. Cultural or seasonal concepts like <span className="text-blue-400 font-semibold">“Ramadan”</span> are used here only to illustrate how those visual elements might appear.
-            </p>
+            <div className="text-slate-400 text-sm leading-relaxed text-center mb-8 space-y-4">
+              <p>
+                In real deployments, AcuSeek searches based on detectable visual elements and events. Cultural or seasonal concepts like <span className="text-blue-400 font-semibold">“Ramadan”</span> are used here only to illustrate how those visual elements might appear.
+              </p>
+              <p className="text-slate-500 text-xs italic">
+                By participating, you confirm that you have read and agree to these <button onClick={(e) => { e.preventDefault(); window.location.hash = '#terms'; }} className="underline hover:text-blue-400 transition-colors cursor-pointer">Terms & Conditions</button>.
+              </p>
+            </div>
             <button 
               onClick={() => setHasAgreedToDisclaimer(true)}
               className="w-full py-4 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold rounded-2xl transition-all shadow-lg active:scale-[0.98]"
@@ -368,7 +373,12 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, initialResultId, onSearch
                     </div>
                   </div>
 
-                  <button onClick={handleShare} className="w-full flex items-center justify-center gap-3 py-3.5 bg-[#1877F2] hover:bg-[#166fe5] text-white text-sm font-bold rounded-xl shadow-lg transition-all active:scale-[0.97]"><Facebook size={16} fill="white" />Share Moment on Facebook</button>
+                  <div className="fixed bottom-0 left-0 right-0 p-4 bg-[#11111a]/95 backdrop-blur-md border-t border-[#2d2d3f] z-[200] min-[1100px]:relative min-[1100px]:p-0 min-[1100px]:bg-transparent min-[1100px]:border-0 shadow-[0_-10px_30px_rgba(0,0,0,0.4)] min-[1100px]:shadow-none">
+                    <button onClick={handleShare} className="w-full flex items-center justify-center gap-3 py-3.5 bg-[#1877F2] hover:bg-[#166fe5] text-white text-sm font-bold rounded-xl shadow-lg transition-all active:scale-[0.97]">
+                        <Facebook size={16} fill="white" />
+                        Share Moment on Facebook
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
