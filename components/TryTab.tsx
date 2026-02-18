@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Search, SlidersHorizontal, CornerUpLeft, Facebook, Clock, ImageOff, Loader2 } from 'lucide-react';
+import { Search, SlidersHorizontal, CornerUpLeft, Facebook, Clock, ImageOff, Loader2, AlertCircle } from 'lucide-react';
 import { STATIC_RESULTS } from '../data';
 import { SearchResult } from '../types';
 import { analytics } from '../services/analytics';
@@ -46,7 +46,7 @@ const stem = (word: string): string => {
   if (word.length <= 3) return word;
   return word
     .replace(/(ing|ed|ly|es|s)$/, '')
-    .replace(/([^aeiou])\1$/, '$1'); // Fix double consonants after stripping (e.g. running -> runn -> run)
+    .replace(/([^aeiou])\1$/, '$1'); // Fix double consonants after stripping
 };
 
 const normalizeTerm = (term: string): string => {
@@ -92,6 +92,7 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, initialResultId, onSearch
   const [similarityThreshold, setSimilarityThreshold] = useState(41); 
   const [selectedResult, setSelectedResult] = useState<SearchResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [hasAgreedToDisclaimer, setHasAgreedToDisclaimer] = useState(false);
 
   useEffect(() => {
     setQuery(initialQuery);
@@ -106,7 +107,6 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, initialResultId, onSearch
       .filter(word => word.length >= 2 && !STOP_WORDS.has(word));
 
     if (queryTokens.length === 0 && rawQuery.length > 0) {
-      // If everything was a stopword, fallback to simple matching
       queryTokens.push(...rawQuery.split(/\s+/));
     }
 
@@ -118,7 +118,6 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, initialResultId, onSearch
         const resTags = res.tags.map(t => t.toLowerCase());
         const resCamera = res.camera.toLowerCase();
         
-        // Exact full phrase match boost (Highest priority)
         const exactFullMatch = resTags.some(tag => tag === rawQuery) || resCamera.includes(rawQuery);
         
         let totalTokenScore = 0;
@@ -134,29 +133,21 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, initialResultId, onSearch
             const tagWords = normTag.split(/\s+/);
             const tagStem = stem(normTag);
             
-            // 1. Exact Match on an exact tag
             if (normTag === qToken) {
               bestMatchForToken = 1.0;
             } 
-            // 2. Keyword Match within a multi-word tag
-            // Rewarding partial phrase match (0.4) so multiple hits sum up to high scores (80%+) 
-            // but lone generic keywords (e.g. 'iftar') stay at 40% (below 41% threshold).
             else if (tagWords.includes(qToken)) {
               bestMatchForToken = Math.max(bestMatchForToken, 0.4);
             }
-            // 3. Stem Match
             else if (tagStem === qStem) {
               bestMatchForToken = Math.max(bestMatchForToken, 0.9);
             }
-            // 4. Keyword Match via Camera Name
             else if (resCamera.includes(qToken)) {
               bestMatchForToken = Math.max(bestMatchForToken, 0.5);
             }
-            // 5. Synonym Match
             else if (synonyms.some(syn => normalizeTerm(syn) === normTag || tagWords.includes(normalizeTerm(syn)))) {
               bestMatchForToken = Math.max(bestMatchForToken, 0.2); 
             }
-            // 6. Fuzzy Match
             else {
               const fScore = fuzzyMatch(normTag, qToken);
               if (fScore > 0.85) {
@@ -171,14 +162,11 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, initialResultId, onSearch
           totalTokenScore += bestMatchForToken;
         });
 
-        // Scoring Formula
         const coverage = queryTokens.length > 0 ? (totalTokenScore / queryTokens.length) : 0;
         const matchedRatio = queryTokens.length > 0 ? (matchedTokensCount / queryTokens.length) : 1;
 
         let finalScore = exactFullMatch ? 100 : (coverage * 100);
 
-        // STRICTURE PENALTY:
-        // Score is heavily reduced if keywords are entirely missing.
         if (matchedRatio < 1.0) {
           finalScore = finalScore * Math.pow(matchedRatio, 3); 
         }
@@ -230,8 +218,11 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, initialResultId, onSearch
   if (!initialQuery) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[70vh] px-4 relative">
-        <div className="flex flex-col items-center mb-10">
+        <div className="flex flex-col items-center mb-6">
           <img src="https://i.imgur.com/9xOewfs.png" alt="AcuSeek" className="w-48 md:w-[480px]" />
+          <p className="mt-8 text-[11px] md:text-xs text-slate-500 font-medium tracking-wide opacity-80 uppercase text-center animate-in fade-in duration-700">
+             Search results are simulated for demonstration purposes only.
+          </p>
         </div>
         <div className="w-full max-w-4xl">
           <div className="relative z-[210]">
@@ -271,7 +262,34 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, initialResultId, onSearch
   }
 
   return (
-    <div className="animate-in slide-in-from-bottom-4 duration-500 pb-24 min-[1100px]:pb-0">
+    <div className="animate-in slide-in-from-bottom-4 duration-500 pb-24 min-[1100px]:pb-0 relative">
+      {/* Disclaimer Modal */}
+      {!hasAgreedToDisclaimer && (
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+          <div className="relative bg-[#11111a] border border-[#2d2d3f] rounded-3xl p-8 max-w-lg w-full shadow-2xl animate-in zoom-in-95 duration-300">
+            <div className="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center mb-6 mx-auto">
+              <AlertCircle size={32} className="text-blue-500" />
+            </div>
+            <h2 className="text-xl font-bold text-slate-100 text-center mb-4">AcuSeek Simulation Policy</h2>
+            <p className="text-slate-400 text-sm leading-relaxed text-center mb-8">
+              In real deployments, AcuSeek searches based on detectable visual elements and events. Cultural or seasonal concepts like <span className="text-blue-400 font-semibold">“Ramadan”</span> are used here only to illustrate how those visual elements might appear.
+            </p>
+            <button 
+              onClick={() => setHasAgreedToDisclaimer(true)}
+              className="w-full py-4 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold rounded-2xl transition-all shadow-lg active:scale-[0.98]"
+            >
+              I Understand & Agree
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="flex justify-end mb-4">
+        <p className="text-[10px] md:text-xs text-slate-500 font-medium tracking-wide opacity-80 uppercase text-right">
+           Search results are simulated for demonstration purposes only.
+        </p>
+      </div>
       <div className="flex flex-col gap-3 mb-8">
          <div className="flex items-center gap-3 w-full">
             <button onClick={() => onSearch('')} className="h-10 w-10 bg-[#11111a] border border-[#2d2d3f] rounded-xl text-slate-400 flex items-center justify-center hover:bg-[#1c1c28] transition-colors"><CornerUpLeft size={18} /></button>
