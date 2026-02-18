@@ -1,3 +1,14 @@
+export interface ROI {
+  label: string;
+  tags: string[];
+  box: {
+    t: number; // top %
+    l: number; // left %
+    w: number; // width %
+    h: number; // height %
+  };
+}
+
 export interface SearchResult {
   id: string;
   thumbnail: string;
@@ -6,9 +17,9 @@ export interface SearchResult {
   timestamp: string;
   score: number;
   tags: string[];
-  // Fix: Added optional properties to support search result similarity scores and match strength in the UI
   displayScore?: number;
   currentMatchScore?: number;
+  rois?: ROI[];
 }
 
 export enum AppTab {

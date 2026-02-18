@@ -1,26 +1,17 @@
 import { SearchResult } from './types';
 
-const DATES_URL = 'https://videos.openai.com/az/vg-assets/task_01kh5t66xyfb2s5311chte73c7%2F1770795575_img_1.webp?se=2026-02-17T13%3A00%3A00Z&sp=r&sv=2026-02-06&sr=b&skoid=cfbc986b-d2bc-4088-8b71-4f962129715b&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-02-11T12%3A15%3A03Z&ske=2026-02-18T12%3A20%3A03Z&sks=b&skv=2026-02-06&sig=EIW/y%2BWVzU5%2B/QxRNj8TrRlyFRvKzQjbTr/%2B6xWu9u0%3D&ac=oaivgprodscus2';
-
-const IFTAR_URL = 'https://videos.openai.com/az/vg-assets/task_01kh8b622cek5ajcpx1tq9q9gm%2F1770880461_img_1.webp?se=2026-02-18T00%3A00%3A00Z&sp=r&sv=2026-02-06&sr=b&skoid=cfbc986b-d2bc-4088-8b71-4f962129715b&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-02-11T12%3A15%3A03Z&ske=2026-02-18T12%3A20%3A03Z&sks=b&skv=2026-02-06&sig=r9TPHJrzOymdDDMA/ccixLanEOXg/UxDVaah2dbLZH8%3D&ac=oaivgprodscus2';
-
-const IFTAR_3_URL = 'https://videos.openai.com/az/vg-assets/task_01kh8scqgbe3eb8f2ef2tj9cmr%2F1770895358_img_0.webp?se=2026-02-18T00%3A00%3A00Z&sp=r&sv=2026-02-06&sr=b&skoid=cfbc986b-d2bc-4088-8b71-4f962129715b&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-02-11T12%3A15%3A03Z&ske=2026-02-18T12%3A20%3A03Z&sks=b&skv=2026-02-06&sig=o82EC51qGFGOEtuwDQ7vFC31A7ZHhwEz0pszW8%2BxUtc%3D&ac=oaivgprodscus2';
-
-const LANTERN_KIDS_URL = 'https://videos.openai.com/az/vg-assets/task_01kh8bra8zfvxbgqh36qfapwgx%2F1770881068_img_1.webp?se=2026-02-18T00%3A00%3A00Z&sp=r&sv=2026-02-06&sr=b&skoid=cfbc986b-d2bc-4088-8b71-4f962129715b&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-02-11T12%3A15%3A03Z&ske=2026-02-18T12%3A20%3A03Z&sks=b&skv=2026-02-06&sig=IMDcshi7ZZkGngA8pCVUvKXvDEPZGPjHMXVDgryww64%3D&ac=oaivgprodscus2';
-
-const LANTERN_KIDS_2_URL = 'https://videos.openai.com/az/vg-assets/task_01kh8bgechf41bd0x9bzgw51wd%2F1770880798_img_1.webp?se=2026-02-18T00%3A00%3A00Z&sp=r&sv=2026-02-06&sr=b&skoid=cfbc986b-d2bc-4088-8b71-4f962129715b&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-02-11T12%3A15%3A03Z&ske=2026-02-18T12%3A20%3A03Z&sks=b&skv=2026-02-06&sig=AD5KCTqvolZqOMRNCE0uhKePlYxK7T%2B7hUpQ5jRfMRM%3D&ac=oaivgprodscus2';
-
-const SWEETS_BOX_URL_1 = 'https://videos.openai.com/az/vg-assets/task_01kh8wf3kqekk8ky4brycy54nm%2F1770898579_img_0.webp?se=2026-02-18T00%3A00%3A00Z&sp=r&sv=2026-02-06&sr=b&skoid=cfbc986b-d2bc-4088-8b71-4f962129715b&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-02-11T12%3A15%3A03Z&ske=2026-02-18T12%3A20%3A03Z&sks=b&skv=2026-02-06&sig=x4KnB0NhcvkdNURTca9I98eX3bjIijEX4BVJPMJNn0U%3D&ac=oaivgprodscus2';
-
-const SWEETS_BOX_URL_2 = 'https://videos.openai.com/az/vg-assets/task_01kh8wf3kqekk8ky4brycy54nm%2F1770898579_img_1.webp?se=2026-02-18T00%3A00%3A00Z&sp=r&sv=2026-02-06&sr=b&skoid=cfbc986b-d2bc-4088-8b71-4f962129715b&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-02-12T12%3A15%3A03Z&ske=2026-02-19T12%3A20%3A03Z&sks=b&skv=2026-02-06&sig=IswwdO%2B78/hH3YW/pslGCPMEO/f/H8R6OlSBoxOlRos%3D&ac=oaivgprodscus2';
-
-const DRUMMER_ALLEY_URL = 'https://videos.openai.com/az/vg-assets/task_01kh8xa1ajerabynrg08fnksc2%2F1770899463_img_0.webp?se=2026-02-18T00%3A00%3A00Z&sp=r&sv=2026-02-06&sr=b&skoid=cfbc986b-d2bc-4088-8b71-4f962129715b&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-02-12T12%3A15%3A03Z&ske=2026-02-19T12%3A20%3A03Z&sks=b&skv=2026-02-06&sig=I9gd530aXVVBbV0kpVnScZ2231hRPsJgiiXcmY/ClW8%3D&ac=oaivgprodscus2';
-
-const DRUMMER_FESTIVE_URL = 'https://videos.openai.com/az/vg-assets/task_01kh8x69freeprbs4qfbe75bcn%2F1770899341_img_1.webp?se=2026-02-18T00%3A00%3A00Z&sp=r&sv=2026-02-06&sr=b&skoid=cfbc986b-d2bc-4088-8b71-4f962129715b&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-02-12T12%3A15%3A03Z&ske=2026-02-19T12%3A20%3A03Z&sks=b&skv=2026-02-06&sig=QYwakAuHPgYJVGIU8RvhoU5wlB4JPiggXlSEMHntN08%3D&ac=oaivgprodscus2';
-
-const MOSQUE_COURTYARD_URL = 'https://videos.openai.com/az/vg-assets/task_01kh8yarkper09ex8ckj3twb9j%2F1770900539_img_0.webp?se=2026-02-18T00%3A00%3A00Z&sp=r&sv=2026-02-06&sr=b&skoid=cfbc986b-d2bc-4088-8b71-4f962129715b&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-02-12T12%3A15%3A03Z&ske=2026-02-19T12%3A20%3A03Z&sks=b&skv=2026-02-06&sig=JpjjvpR4EVgRI2aSpiIVinLSz%2Bjd/MnORxZc9dCvtQY%3D&ac=oaivgprodscus2';
-
-const MOSQUE_ENTRANCE_URL = 'https://videos.openai.com/az/vg-assets/task_01kh8y6wdwe4dtgj3zm7wp454p%2F1770900410_img_0.webp?se=2026-02-18T00%3A00%3A00Z&sp=r&sv=2026-02-06&sr=b&skoid=cfbc986b-d2bc-4088-8b71-4f962129715b&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-02-12T12%3A15%3A03Z&ske=2026-02-19T12%3A20%3A03Z&sks=b&skv=2026-02-06&sig=4EA/voNvFE9Fe8uFKER6/ht5INPGiOGScwEz7TNl%2BEw%3D&ac=oaivgprodscus2';
+const DATES_URL = 'https://i.imgur.com/OioTkdP.jpeg';
+const IFTAR_URL = 'https://i.imgur.com/o7gWRJQ.jpeg';
+const IFTAR_3_URL = 'https://i.imgur.com/oNuefvQ.jpeg';
+const LANTERN_KIDS_URL = 'https://i.imgur.com/ogy6ELJ.jpeg';
+const LANTERN_KIDS_2_URL = 'https://i.imgur.com/q0sn2q7.jpeg';
+const SWEETS_BOX_URL_1 = 'https://i.imgur.com/oXC2Oa7.jpeg';
+const SWEETS_BOX_URL_2 = 'https://i.imgur.com/DBhBQsp.jpeg';
+const DRUMMER_ALLEY_URL = 'https://i.imgur.com/Iitu7qs.jpeg';
+const DRUMMER_FESTIVE_URL = 'https://i.imgur.com/2QwUBKc.jpeg';
+const MOSQUE_COURTYARD_URL = 'https://i.imgur.com/Z0wv2Mi.jpeg';
+const MOSQUE_ENTRANCE_URL = 'https://i.imgur.com/vCj6B04.jpeg';
+const IFTAR_CANNON_URL = 'https://i.imgur.com/z34QecQ.jpeg';
 
 export const STATIC_RESULTS: SearchResult[] = [
   {
@@ -30,7 +21,11 @@ export const STATIC_RESULTS: SearchResult[] = [
     camera: 'Dining Hall - Cam 04',
     timestamp: '2024-03-24 18:30:05',
     score: 88,
-    tags: ['dates', 'fruit', 'snack', 'ramadan', 'food', 'lantern', 'fanous', 'fanoos', 'fanus', 'ramadan kareem']
+    tags: ['dates', 'fruit', 'snack', 'tamr', 'dates box', 'fanoos', 'dates next to lantern'],
+    rois: [
+      { label: 'Dates Box', tags: ['dates', 'box', 'tray', 'fruit'], box: { t: 35, l: 35, w: 45, h: 40 } },
+      { label: 'Fanoos', tags: ['lantern', 'fanoos', 'fanous'], box: { t: 15, l: 5, w: 30, h: 70 } }
+    ]
   },
   {
     id: '2',
@@ -38,8 +33,12 @@ export const STATIC_RESULTS: SearchResult[] = [
     preview: IFTAR_URL,
     camera: 'Main Entrance - Cam 01',
     timestamp: '2024-03-24 18:45:12',
-    score: 95,
-    tags: ['iftar', 'dinner', 'gathering', 'ramadan', 'table', 'food']
+    score: 100,
+    tags: ['iftar', 'dinner', 'gathering', 'ramadan', 'table', 'food', 'meal', 'people having iftar meal', 'community breaking fast'],
+    rois: [
+      { label: 'People Eating', tags: ['people', 'gathering', 'community', 'iftar'], box: { t: 15, l: 15, w: 75, h: 65 } },
+      { label: 'Iftar Meal', tags: ['iftar', 'table', 'food', 'meal'], box: { t: 55, l: 10, w: 80, h: 35 } }
+    ]
   },
   {
     id: '7',
@@ -47,8 +46,25 @@ export const STATIC_RESULTS: SearchResult[] = [
     preview: IFTAR_3_URL,
     camera: 'Banquet Hall - Cam 07',
     timestamp: '2024-03-26 18:55:00',
-    score: 98,
-    tags: ['iftar', 'dinner', 'feast', 'ramadan', 'celebration', 'gathering', 'food']
+    score: 100,
+    tags: ['iftar', 'dinner', 'feast', 'ramadan', 'celebration', 'gathering', 'food', 'meal', 'people having iftar meal at long tables'],
+    rois: [
+      { label: 'Iftar Tables', tags: ['iftar', 'table', 'food', 'meal'], box: { t: 25, l: 5, w: 90, h: 70 } },
+      { label: 'People', tags: ['people', 'gathering', 'celebration'], box: { t: 10, l: 10, w: 80, h: 40 } }
+    ]
+  },
+  {
+    id: '14',
+    thumbnail: IFTAR_CANNON_URL,
+    preview: IFTAR_CANNON_URL,
+    camera: 'Public Square - CAM 01',
+    timestamp: '2021-04-12 18:31:45',
+    score: 100,
+    tags: ['cannon', 'iftar cannon', 'madfa-al-iftar', 'madfa', 'firing', 'tradition', 'plaza', 'square', 'public square', 'firing madfa in square'],
+    rois: [
+      { label: 'Iftar Cannon', tags: ['cannon', 'madfa'], box: { t: 40, l: 30, w: 30, h: 40 } },
+      { label: 'Crowd', tags: ['people', 'crowd'], box: { t: 60, l: 0, w: 100, h: 40 } }
+    ]
   },
   {
     id: '4',
@@ -56,8 +72,12 @@ export const STATIC_RESULTS: SearchResult[] = [
     preview: LANTERN_KIDS_URL,
     camera: 'Outdoor Courtyard - Cam 05',
     timestamp: '2024-03-24 19:45:00',
-    score: 96,
-    tags: ['lantern', 'fanous', 'fanoos', 'fanus', 'kids', 'children', 'ramadan', 'lights', 'celebration', 'festive']
+    score: 100,
+    tags: ['lantern', 'fanous', 'fanoos', 'fanus', 'kids', 'children', 'ramadan', 'lights', 'celebration', 'festive', 'playing', 'children playing with lanterns'],
+    rois: [
+      { label: 'Children', tags: ['kids', 'children', 'boys'], box: { t: 25, l: 15, w: 70, h: 70 } },
+      { label: 'Lanterns', tags: ['lantern', 'fanoos', 'fanous', 'lights'], box: { t: 45, l: 30, w: 40, h: 45 } }
+    ]
   },
   {
     id: '5',
@@ -65,8 +85,12 @@ export const STATIC_RESULTS: SearchResult[] = [
     preview: LANTERN_KIDS_2_URL,
     camera: 'Main Hallway - Cam 03',
     timestamp: '2024-03-24 19:50:15',
-    score: 94,
-    tags: ['lantern', 'fanous', 'fanoos', 'fanus', 'kids', 'children', 'ramadan', 'lights', 'celebration']
+    score: 100,
+    tags: ['lantern', 'fanous', 'fanoos', 'fanus', 'kids', 'children', 'ramadan', 'lights', 'celebration', 'playing', 'kids playing with lanterns'],
+    rois: [
+      { label: 'Children', tags: ['kids', 'children', 'boys'], box: { t: 15, l: 20, w: 60, h: 80 } },
+      { label: 'Fanoos', tags: ['lantern', 'fanoos', 'fanous'], box: { t: 40, l: 35, w: 30, h: 45 } }
+    ]
   },
   {
     id: '8',
@@ -75,7 +99,11 @@ export const STATIC_RESULTS: SearchResult[] = [
     camera: 'Entrance Hallway - Cam 03',
     timestamp: '2021-04-04 02:15:00',
     score: 99,
-    tags: ['sweets', 'baklava', 'dessert', 'gift box', 'ramadan kareem sign', 'door', 'hallway', 'lantern', 'fanous', 'fanoos', 'fanus', 'crescent moon']
+    tags: ['sweets', 'baklava', 'dessert', 'gift box', 'ramadan kareem sign', 'door', 'hallway', 'lantern', 'fanous', 'fanoos', 'fanus', 'crescent moon'],
+    rois: [
+      { label: 'Baklava Box', tags: ['baklava', 'sweets', 'box', 'gift'], box: { t: 50, l: 40, w: 45, h: 35 } },
+      { label: 'Crescent Moon', tags: ['moon', 'crescent', 'decoration'], box: { t: 30, l: 5, w: 30, h: 60 } }
+    ]
   },
   {
     id: '9',
@@ -84,14 +112,10 @@ export const STATIC_RESULTS: SearchResult[] = [
     camera: 'Entrance Hallway - Cam 03',
     timestamp: '2021-04-04 02:15:45',
     score: 100,
-    tags: [
-      'Box of sweets by the door',
-      'Ramadan Kareem sign on the floor',
-      'Baklava tray in the hallway',
-      'Lantern and crescent moon decoration',
-      'Sweets delivery at the entrance',
-      'Fanoos next to a gift box',
-      'sweets', 'baklava', 'box', 'door', 'sign', 'floor', 'hallway', 'lantern', 'decoration', 'entrance', 'gift'
+    tags: ['sweets', 'baklava', 'box', 'door', 'sign', 'floor', 'hallway', 'lantern', 'decoration', 'entrance', 'gift'],
+    rois: [
+      { label: 'Sweets Box', tags: ['sweets', 'baklava', 'box'], box: { t: 45, l: 35, w: 50, h: 40 } },
+      { label: 'Ramadan Sign', tags: ['sign', 'ramadan', 'kareem'], box: { t: 70, l: 15, w: 50, h: 25 } }
     ]
   },
   {
@@ -101,14 +125,10 @@ export const STATIC_RESULTS: SearchResult[] = [
     camera: 'Narrow Alley - Cam 04',
     timestamp: '2021-04-15 00:14:00',
     score: 98,
-    tags: [
-      'Man walking with a drum in the street at night',
-      'Traditional Ramadan drummer in an alley',
-      'Mesaharaty walking with a lantern and drum',
-      'A man beating a drum for Suhoor',
-      'Old street Ramadan drummer',
-      'drum', 'drummer', 'alley', 'night', 'lantern', 'fanous', 'fanoos', 'fanus', 'suhoor', 
-      'mesaharaty', 'musaharaty', 'mesaharati', 'musaharati', 'masaharaty', 'masaharati', 'mousaharaty', 'mousaharati', 'misaharaty', 'misaharati'
+    tags: ['drum', 'drummer', 'alley', 'night', 'lantern', 'fanous', 'fanoos', 'fanus', 'suhoor', 'mesaharaty', 'man with a drum'],
+    rois: [
+      { label: 'Mesaharaty', tags: ['mesaharaty', 'drummer', 'man'], box: { t: 15, l: 30, w: 40, h: 80 } },
+      { label: 'Drum', tags: ['drum', 'percussion'], box: { t: 55, l: 35, w: 25, h: 25 } }
     ]
   },
   {
@@ -118,14 +138,10 @@ export const STATIC_RESULTS: SearchResult[] = [
     camera: 'Decorated Street - Zan Da',
     timestamp: '2027-04-15 02:00:00',
     score: 100,
-    tags: [
-      'Man with a drum under Ramadan lights and banners',
-      'Ramadan drummer in a festive decorated street',
-      'Mesaharaty walking in a lit alleyway',
-      'Traditional Suhoor caller with street decorations',
-      'Festive street drummer at night',
-      'drum', 'drummer', 'lights', 'banners', 'festive', 'street', 'night', 'decorations', 'suhoor', 
-      'mesaharaty', 'musaharaty', 'mesaharati', 'musaharati', 'masaharaty', 'masaharati', 'mousaharaty', 'mousaharati', 'misaharaty', 'misaharati'
+    tags: ['drum', 'drummer', 'lights', 'banners', 'festive', 'street', 'night', 'decorations', 'suhoor', 'mesaharaty', 'mesaharaty walking in street'],
+    rois: [
+      { label: 'Mesaharaty', tags: ['mesaharaty', 'drummer', 'man'], box: { t: 10, l: 35, w: 35, h: 85 } },
+      { label: 'Festival Lights', tags: ['lights', 'decorations', 'banners'], box: { t: 0, l: 0, w: 100, h: 40 } }
     ]
   },
   {
@@ -135,13 +151,10 @@ export const STATIC_RESULTS: SearchResult[] = [
     camera: 'Mosque Courtyard - Cam 04',
     timestamp: '2021-03-28 04:35:17',
     score: 100,
-    tags: [
-      'Mosque courtyard at night with festive lights',
-      'Crescent moon and star light decoration',
-      'Colorful banners and pennants hanging near mosque',
-      'Traditional lanterns and fairy lights in courtyard',
-      'People walking in mosque plaza at night',
-      'mosque', 'courtyard', 'crescent', 'moon', 'star', 'lights', 'banners', 'night', 'people', 'plaza', 'fanoos', 'lantern', 'festive'
+    tags: ['mosque', 'courtyard', 'crescent', 'moon', 'star', 'lights', 'banners', 'night', 'people', 'plaza', 'fanoos', 'lantern', 'festive', 'mosque courtyard at night'],
+    rois: [
+      { label: 'Crescent Moon', tags: ['crescent', 'moon', 'lights'], box: { t: 5, l: 35, w: 40, h: 50 } },
+      { label: 'Mosque Plaza', tags: ['mosque', 'masjid', 'plaza', 'courtyard'], box: { t: 40, l: 0, w: 100, h: 60 } }
     ]
   },
   {
@@ -151,13 +164,10 @@ export const STATIC_RESULTS: SearchResult[] = [
     camera: 'Mosque Entrance - Cam 09',
     timestamp: '2024-03-29 20:15:00',
     score: 100,
-    tags: [
-      'Grand mosque entrance at night',
-      'Festive Ramadan decorations at the mosque',
-      'Hanging lanterns and crescent lights over mosque entrance',
-      'Ramadan night celebration at the masjid',
-      'Traditional lighting banners across the plaza',
-      'mosque', 'masjid', 'entrance', 'lights', 'decorations', 'plaza', 'night', 'celebration', 'festive', 'lantern', 'crescent'
+    tags: ['mosque', 'masjid', 'entrance', 'lights', 'decorations', 'plaza', 'night', 'celebration', 'festive', 'lantern', 'crescent', 'grand mosque entrance'],
+    rois: [
+      { label: 'Mosque Portal', tags: ['entrance', 'gate', 'mosque'], box: { t: 15, l: 15, w: 70, h: 75 } },
+      { label: 'Ramadan Lights', tags: ['lantern', 'fanoos', 'lights', 'decorations'], box: { t: 0, l: 5, w: 90, h: 35 } }
     ]
   }
 ];

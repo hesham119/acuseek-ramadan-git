@@ -12,25 +12,54 @@ interface TryTabProps {
 }
 
 /**
- * Semantic Synonyms for Ramadan Context
+ * Enhanced Semantic Synonyms
  */
 const SYNONYMS: Record<string, string[]> = {
-  'mosque': ['masjid', 'masjed', 'jamaa', 'mosk'],
+  'mosque': ['masjid', 'masjed', 'jamaa', 'mosk', 'temple', 'place of worship'],
   'masjid': ['mosque', 'masjed', 'jamaa'],
-  'lantern': ['fanoos', 'fanous', 'fanus', 'lamp', 'light'],
+  'lantern': ['fanoos', 'fanous', 'fanus', 'lamp', 'light', 'decoration'],
   'fanoos': ['lantern', 'fanous', 'fanus'],
   'fanous': ['lantern', 'fanoos', 'fanus'],
-  'sweets': ['dessert', 'baklava', 'baklawa', 'treats', 'sweet'],
-  'drummer': ['mesaharaty', 'musaharaty', 'mesaharati', 'musaharati', 'suhoor caller'],
+  'sweets': ['dessert', 'baklava', 'baklawa', 'treats', 'sweet', 'pastry'],
+  'drummer': ['mesaharaty', 'musaharaty', 'mesaharati', 'musaharati', 'suhoor caller', 'dawn caller'],
   'mesaharaty': ['drummer', 'musaharaty', 'suhoor caller'],
-  'dates': ['tamr', 'fruit', 'breaking fast'],
-  'iftar': ['dinner', 'breaking fast', 'fasting', 'gathering']
+  'dates': ['tamr', 'fruit', 'breaking fast', 'palm fruit'],
+  'iftar': ['dinner', 'breaking fast', 'fasting', 'gathering', 'meal', 'food', 'maghrib'],
+  'meal': ['food', 'iftar', 'dinner', 'break fast', 'dish', 'plate'],
+  'food': ['meal', 'iftar', 'dinner', 'snack'],
+  'cannon': ['madfa', 'madfaa', 'firing', 'artillery', 'gun', 'tradition', 'iftar cannon'],
+  'madfa': ['cannon', 'iftar cannon', 'madfaa'],
+  'playing': ['carrying', 'holding', 'walking', 'celebrating', 'gathering', 'moving'],
+  'holding': ['carrying', 'playing', 'with', 'having'],
+  'having': ['eating', 'holding', 'with']
 };
 
 /**
- * Levenshtein distance utility for fuzzy matching
+ * Expanded stop words list
  */
-const getLevenshteinDistance = (a: string, b: string): number => {
+const STOP_WORDS = new Set(['a', 'an', 'the', 'is', 'are', 'doing', 'with', 'some', 'someone', 'and', 'in', 'at', 'on', 'of', 'for', 'having', 'has', 'had', 'take', 'taking', 'get', 'getting', 'there', 'was', 'were', 'by', 'that', 'this']);
+
+/**
+ * Basic Rule-based Stemming (Suffix stripping)
+ */
+const stem = (word: string): string => {
+  if (word.length <= 3) return word;
+  return word
+    .replace(/(ing|ed|ly|es|s)$/, '')
+    .replace(/([^aeiou])\1$/, '$1'); // Fix double consonants after stripping (e.g. running -> runn -> run)
+};
+
+const normalizeTerm = (term: string): string => {
+  return term
+    .toLowerCase()
+    .trim()
+    .replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, "");
+};
+
+/**
+ * Levenshtein distance for fuzzy matching
+ */
+const levenshtein = (a: string, b: string): number => {
   const matrix = Array.from({ length: a.length + 1 }, () => 
     Array.from({ length: b.length + 1 }, (_, i) => i)
   );
@@ -49,33 +78,20 @@ const getLevenshteinDistance = (a: string, b: string): number => {
   return matrix[a.length][b.length];
 };
 
-const getSimilarity = (s1: string, s2: string): number => {
-  const longer = s1.length > s2.length ? s1 : s2;
-  const shorter = s1.length > s2.length ? s2 : s1;
-  if (longer.length === 0) return 1.0;
-  return (longer.length - getLevenshteinDistance(longer, shorter)) / longer.length;
+const fuzzyMatch = (s1: string, s2: string): number => {
+  if (s1 === s2) return 1.0;
+  if (s1.includes(s2) || s2.includes(s1)) return 0.85;
+  const dist = levenshtein(s1, s2);
+  const maxLen = Math.max(s1.length, s2.length);
+  const similarity = (maxLen - dist) / maxLen;
+  return similarity > 0.7 ? similarity : 0;
 };
-
-/**
- * Basic NLP utility to clean and normalize search terms
- */
-const normalizeTerm = (term: string): string => {
-  return term
-    .toLowerCase()
-    .trim()
-    .replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, "")
-    // Stemming: remove common pluralization
-    .replace(/(s)$/, "");
-};
-
-const STOP_WORDS = new Set(['a', 'an', 'the', 'is', 'are', 'doing', 'with', 'some', 'someone', 'people', 'and', 'in', 'at', 'on', 'of', 'for']);
 
 const TryTab: React.FC<TryTabProps> = ({ initialQuery, initialResultId, onSearch, onSelectResult }) => {
   const [query, setQuery] = useState(initialQuery);
-  const [similarity, setSimilarity] = useState(50); 
+  const [similarityThreshold, setSimilarityThreshold] = useState(41); 
   const [selectedResult, setSelectedResult] = useState<SearchResult | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     setQuery(initialQuery);
@@ -85,99 +101,107 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, initialResultId, onSearch
     if (!initialQuery) return [];
     
     const rawQuery = initialQuery.toLowerCase().trim();
-    const searchTokens = rawQuery
+    const queryTokens = rawQuery
       .split(/\s+/)
       .filter(word => word.length >= 2 && !STOP_WORDS.has(word));
 
-    const normalizedTokens = searchTokens.map(normalizeTerm);
+    if (queryTokens.length === 0 && rawQuery.length > 0) {
+      // If everything was a stopword, fallback to simple matching
+      queryTokens.push(...rawQuery.split(/\s+/));
+    }
+
+    const normalizedQueryTokens = queryTokens.map(normalizeTerm);
+    const stemmedQueryTokens = normalizedQueryTokens.map(stem);
 
     return STATIC_RESULTS
       .map(res => {
         const resTags = res.tags.map(t => t.toLowerCase());
         const resCamera = res.camera.toLowerCase();
         
-        // 1. Check for exact phrase match (Highest Priority)
-        const exactPhraseMatch = resTags.some(tag => tag === rawQuery) || resCamera.includes(rawQuery);
+        // Exact full phrase match boost (Highest priority)
+        const exactFullMatch = resTags.some(tag => tag === rawQuery) || resCamera.includes(rawQuery);
         
-        // 2. Semantic Token Match with Tiered Fuzzy & Synonym Support
-        let matchPoints = 0;
-        let highestSimAcrossTokens = 0;
+        let totalTokenScore = 0;
+        let matchedTokensCount = 0;
 
-        normalizedTokens.forEach(token => {
-          let tokenMaxSim = 0;
-          const synonyms = SYNONYMS[token] || [];
+        normalizedQueryTokens.forEach((qToken, idx) => {
+          let bestMatchForToken = 0;
+          const qStem = stemmedQueryTokens[idx];
+          const synonyms = SYNONYMS[qToken] || [];
 
           resTags.forEach(tag => {
             const normTag = normalizeTerm(tag);
+            const tagWords = normTag.split(/\s+/);
+            const tagStem = stem(normTag);
             
-            // Check Synonyms First (Semantic Link)
-            const isSynonym = synonyms.some(syn => normalizeTerm(syn) === normTag);
-            if (isSynonym) {
-                tokenMaxSim = Math.max(tokenMaxSim, 0.95); // High confidence for synonyms
+            // 1. Exact Match on an exact tag
+            if (normTag === qToken) {
+              bestMatchForToken = 1.0;
+            } 
+            // 2. Keyword Match within a multi-word tag
+            // Rewarding partial phrase match (0.4) so multiple hits sum up to high scores (80%+) 
+            // but lone generic keywords (e.g. 'iftar') stay at 40% (below 41% threshold).
+            else if (tagWords.includes(qToken)) {
+              bestMatchForToken = Math.max(bestMatchForToken, 0.4);
             }
-
-            // Exact or Substring match
-            if (normTag === token || tag.toLowerCase() === token) {
-                tokenMaxSim = Math.max(tokenMaxSim, 1.0);
-            } else if (normTag.includes(token) && token.length > 3) {
-                tokenMaxSim = Math.max(tokenMaxSim, 0.9);
-            } else {
-                // Tiered Fuzzy Thresholding
-                const fuzzySim = getSimilarity(token, normTag);
-                let minThreshold = 0.70; // Default for long words
-                
-                if (token.length <= 5) minThreshold = 0.90; // Strict for "sweet", "gift", "box"
-                else if (token.length <= 7) minThreshold = 0.85; // Medium for "mosque", "street", "iftar"
-                
-                if (fuzzySim >= minThreshold) {
-                  tokenMaxSim = Math.max(tokenMaxSim, fuzzySim);
-                }
+            // 3. Stem Match
+            else if (tagStem === qStem) {
+              bestMatchForToken = Math.max(bestMatchForToken, 0.9);
+            }
+            // 4. Keyword Match via Camera Name
+            else if (resCamera.includes(qToken)) {
+              bestMatchForToken = Math.max(bestMatchForToken, 0.5);
+            }
+            // 5. Synonym Match
+            else if (synonyms.some(syn => normalizeTerm(syn) === normTag || tagWords.includes(normalizeTerm(syn)))) {
+              bestMatchForToken = Math.max(bestMatchForToken, 0.2); 
+            }
+            // 6. Fuzzy Match
+            else {
+              const fScore = fuzzyMatch(normTag, qToken);
+              if (fScore > 0.85) {
+                bestMatchForToken = Math.max(bestMatchForToken, 0.1);
+              }
             }
           });
 
-          // Camera name match
-          if (resCamera.includes(token)) {
-            tokenMaxSim = Math.max(tokenMaxSim, 0.8);
+          if (bestMatchForToken > 0.35) {
+            matchedTokensCount++;
           }
-
-          matchPoints += tokenMaxSim * 2;
-          highestSimAcrossTokens = Math.max(highestSimAcrossTokens, tokenMaxSim);
+          totalTokenScore += bestMatchForToken;
         });
 
-        // 3. Calculate Score
-        const coverage = searchTokens.length > 0 ? (matchPoints / (searchTokens.length * 2)) : 0;
-        let finalScore = exactPhraseMatch ? 100 : Math.min(100, (res.score * 0.15) + (coverage * 85));
-        
-        // Filter out very weak matches
-        if (!exactPhraseMatch && highestSimAcrossTokens < 0.7 && matchPoints < 1) {
-           finalScore = 0;
+        // Scoring Formula
+        const coverage = queryTokens.length > 0 ? (totalTokenScore / queryTokens.length) : 0;
+        const matchedRatio = queryTokens.length > 0 ? (matchedTokensCount / queryTokens.length) : 1;
+
+        let finalScore = exactFullMatch ? 100 : (coverage * 100);
+
+        // STRICTURE PENALTY:
+        // Score is heavily reduced if keywords are entirely missing.
+        if (matchedRatio < 1.0) {
+          finalScore = finalScore * Math.pow(matchedRatio, 3); 
         }
 
-        return { 
-          ...res, 
-          displayScore: Math.round(finalScore)
-        };
+        return { ...res, displayScore: Math.round(finalScore) };
       })
-      .filter(res => (res.displayScore ?? 0) >= similarity)
+      .filter(res => (res.displayScore ?? 0) >= similarityThreshold)
       .sort((a, b) => {
-        return (b.displayScore ?? 0) - (a.displayScore ?? 0) || b.score - a.score;
+          if ((b.displayScore ?? 0) !== (a.displayScore ?? 0)) {
+              return (b.displayScore ?? 0) - (a.displayScore ?? 0);
+          }
+          return b.score - a.score;
       });
-  }, [initialQuery, similarity]);
+  }, [initialQuery, similarityThreshold]);
 
   useEffect(() => {
     if (filteredResults.length > 0) {
       if (initialResultId) {
         const resultFromUrl = filteredResults.find(r => r.id === initialResultId);
-        if (resultFromUrl) {
-          setSelectedResult(resultFromUrl);
-          return;
-        }
+        if (resultFromUrl) { setSelectedResult(resultFromUrl); return; }
       }
-
       const isStillInList = filteredResults.some(r => r.id === selectedResult?.id);
-      if (!isStillInList) {
-        setSelectedResult(filteredResults[0]);
-      }
+      if (!isStillInList) setSelectedResult(filteredResults[0]);
     } else {
       setSelectedResult(null);
     }
@@ -185,101 +209,59 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, initialResultId, onSearch
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!query.trim()) {
-      setError('Please enter a search description.');
-      return;
-    }
+    if (!query.trim()) { setError('Please enter a description.'); return; }
     setError(null);
-    
-    // Track search query
-    analytics.trackEvent('search_performed', { 
-      query: query.trim(),
-      similarity_threshold: similarity
-    });
-    
     onSearch(query.trim());
   };
 
   const handleSelectResult = (result: SearchResult) => {
     setSelectedResult(result);
-    
-    // Track result selection
-    analytics.trackEvent('result_selected', { 
-      result_id: result.id,
-      camera: result.camera,
-      similarity_score: result.displayScore
-    });
-
     if (onSelectResult) onSelectResult(result.id);
   };
 
   const handleShare = () => {
     if (!selectedResult) return;
-
-    // Track share action
-    analytics.trackEvent('share_to_facebook', {
-      result_id: selectedResult.id,
-      camera: selectedResult.camera
-    });
-
-    const baseUrl = window.location.origin + window.location.pathname;
-    const shareParams = new URLSearchParams();
-    shareParams.set('q', initialQuery);
-    shareParams.set('id', selectedResult.id);
-    const fullUrl = `${baseUrl}#try?${shareParams.toString()}`;
-    const quoteText = `I found a special Ramadan moment! AcuSeek Ramadan Challenge: Find Ramadan moments and win prizes.`;
-    const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(fullUrl)}&quote=${encodeURIComponent(quoteText)}`;
-    window.open(fbUrl, '_blank', 'width=600,height=400');
+    const fullUrl = `${window.location.origin}${window.location.pathname}#try?q=${encodeURIComponent(initialQuery)}&id=${selectedResult.id}`;
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(fullUrl)}`, '_blank', 'width=600,height=400');
   };
 
-  const handleImageError = (id: string) => {
-    setImageErrors(prev => ({ ...prev, [id]: true }));
-  };
-
-  const exampleTerms = ['dates', 'iftar', 'mosque at night', 'mesaharaty', 'crescent moon lights'];
+  const exampleTerms = ['a box of dates', 'people having iftar meal', 'iftar cannon in the square', 'mesaharaty with drums', 'kids playing with lanterns', 'grand mosque entrance with decorations'];
 
   if (!initialQuery) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[70vh] animate-in fade-in duration-500 px-4">
-        <div className="flex flex-col items-center mb-10 md:mb-16">
-           <div className="mb-2">
-              <img 
-                src="https://i.imgur.com/9xOewfs.png" 
-                alt="Hikvision AcuSeek Logo" 
-                className="w-48 h-auto md:w-[480px] object-contain"
-              />
-           </div>
+      <div className="flex flex-col items-center justify-center min-h-[70vh] px-4 relative">
+        <div className="flex flex-col items-center mb-10">
+          <img src="https://i.imgur.com/9xOewfs.png" alt="AcuSeek" className="w-48 md:w-[480px]" />
         </div>
-
         <div className="w-full max-w-4xl">
-          <form onSubmit={handleSearchSubmit} className="flex flex-col sm:relative group mb-8 gap-3 sm:gap-0">
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Describe what happened... e.g. 'grand mosque entrance with decorations'"
-              className={`w-full h-12 md:h-16 px-6 sm:pr-40 rounded-2xl sm:rounded-full border ${error ? 'border-red-500' : 'border-[#2d2d3f]'} bg-[#11111a] text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all text-sm md:text-base shadow-2xl placeholder:text-slate-600`}
-            />
-            <button
-              type="submit"
-              className="sm:absolute sm:right-1.5 sm:top-1.5 sm:bottom-1.5 px-10 py-3 sm:py-0 bg-gradient-to-r from-[#9b67f1] to-[#3476f1] hover:from-[#a87df2] hover:to-[#4a84f2] text-white font-medium rounded-full transition-all shadow-lg active:scale-95 text-base md:text-lg"
-            >
-              Search
-            </button>
-            {error && <p className="text-red-500 text-[10px] mt-2 ml-4 sm:absolute sm:top-full">{error}</p>}
-          </form>
-
-          <div className="flex flex-col items-center justify-center gap-3">
-             <div className="text-[10px] uppercase tracking-[0.2em] font-black text-slate-600">Sample Queries</div>
+          <div className="relative z-[210]">
+            <form onSubmit={handleSearchSubmit} className="flex flex-col sm:relative mb-8 gap-3 sm:gap-0">
+              <input 
+                type="text" 
+                value={query} 
+                onChange={(e) => setQuery(e.target.value)} 
+                placeholder="Describe what happened... e.g. 'people having iftar meal'" 
+                className="w-full h-12 md:h-16 px-6 sm:pr-40 rounded-2xl sm:rounded-full border border-[#2d2d3f] bg-[#11111a] text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-2xl" 
+              />
+              <button 
+                type="submit" 
+                className="sm:absolute sm:right-1.5 sm:top-1.5 sm:bottom-1.5 px-10 py-3 sm:py-0 bg-gradient-to-r from-[#9b67f1] to-[#3476f1] text-white font-medium rounded-full transition-all hover:brightness-110 active:scale-95"
+              >
+                Search
+              </button>
+            </form>
+          </div>
+          <div className="flex flex-col items-center gap-3 relative z-[210]">
+             <div className="text-[10px] uppercase tracking-widest font-black text-slate-600">Sample Queries</div>
              <div className="flex flex-wrap justify-center gap-2">
                 {exampleTerms.map(term => (
-                   <button 
-                     key={term} 
-                     onClick={() => { setQuery(term); onSearch(term); analytics.trackEvent('search_performed', { query: term, type: 'example' }); }}
-                     className="px-3 md:px-4 py-1.5 bg-[#2d2d3f]/40 hover:bg-[#3b82f6]/20 border border-[#2d2d3f] hover:border-blue-500/50 rounded-full text-[10px] md:text-[11px] text-slate-400 hover:text-blue-400 transition-all flex items-center gap-1.5 whitespace-nowrap"
-                   >
-                     <Clock size={12} className="text-slate-600 shrink-0" /> {term}
-                   </button>
+                  <button 
+                    key={term} 
+                    onClick={() => { setQuery(term); onSearch(term); }} 
+                    className="px-3 py-1.5 bg-[#2d2d3f]/40 hover:bg-[#3b82f6]/20 border border-[#2d2d3f] rounded-full text-[10px] text-slate-400 flex items-center gap-1.5 transition-colors"
+                  >
+                    <Clock size={12} /> {term}
+                  </button>
                 ))}
              </div>
           </div>
@@ -290,184 +272,97 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, initialResultId, onSearch
 
   return (
     <div className="animate-in slide-in-from-bottom-4 duration-500 pb-24 min-[1100px]:pb-0">
-      <div className="flex flex-col gap-3 md:gap-4 mb-6 md:mb-8">
+      <div className="flex flex-col gap-3 mb-8">
          <div className="flex items-center gap-3 w-full">
-            <button 
-              onClick={() => onSearch('')}
-              className="h-10 md:h-11 w-10 md:w-11 bg-[#11111a] border border-[#2d2d3f] rounded-xl text-slate-400 hover:text-blue-400 transition-all shrink-0 flex items-center justify-center"
-              aria-label="Go back"
-            >
-              <CornerUpLeft size={18} />
-            </button>
-            <form onSubmit={handleSearchSubmit} className="flex-grow relative h-10 md:h-11">
-               <input
-                 type="text"
-                 value={query}
-                 onChange={(e) => setQuery(e.target.value)}
-                 className="w-full h-full pl-10 md:pl-12 pr-4 rounded-xl border border-[#2d2d3f] focus:outline-none focus:ring-1 focus:ring-blue-500 bg-[#11111a] text-slate-200 text-sm"
-               />
-               <Search className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 text-slate-500 md:w-4 md:h-4" size={14} />
+            <button onClick={() => onSearch('')} className="h-10 w-10 bg-[#11111a] border border-[#2d2d3f] rounded-xl text-slate-400 flex items-center justify-center hover:bg-[#1c1c28] transition-colors"><CornerUpLeft size={18} /></button>
+            <form onSubmit={handleSearchSubmit} className="flex-grow relative h-10">
+               <input type="text" value={query} onChange={(e) => setQuery(e.target.value)} className="w-full h-full pl-10 pr-4 rounded-xl border border-[#2d2d3f] bg-[#11111a] text-slate-200 text-sm focus:ring-1 focus:ring-blue-500 outline-none" />
+               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={14} />
             </form>
          </div>
-         <button 
-            onClick={handleSearchSubmit}
-            className="w-full px-10 h-10 md:h-11 bg-gradient-to-r from-[#9b67f1] to-[#3476f1] hover:from-[#a87df2] hover:to-[#4a84f2] text-white font-medium rounded-xl transition-all shadow-md shrink-0 text-sm"
-         >
-           Search
-         </button>
+         <button onClick={handleSearchSubmit} className="w-full px-10 h-10 bg-gradient-to-r from-[#9b67f1] to-[#3476f1] text-white font-medium rounded-xl text-sm transition-all hover:brightness-110 active:scale-[0.98]">Search</button>
       </div>
-
-      <div className="flex flex-col mb-6 md:mb-8 bg-[#11111a] p-4 rounded-xl border border-[#2d2d3f]">
+      <div className="flex flex-col mb-8 bg-[#11111a] p-4 rounded-xl border border-[#2d2d3f] shadow-sm">
         <div className="flex items-center gap-4 w-full">
-          <SlidersHorizontal size={16} className="text-slate-500 shrink-0" />
-          <span className="text-[10px] md:text-xs font-medium text-slate-400 shrink-0">Similarity Threshold</span>
-          <input
-            type="range"
-            min="1"
-            max="100"
-            value={similarity}
-            onChange={(e) => {
-              const val = parseInt(e.target.value);
-              setSimilarity(val < 1 ? 1 : val);
-            }}
-            className="flex-grow accent-blue-500 h-1 bg-[#2d2d3f] rounded-lg cursor-pointer"
-          />
-          <span className="text-[10px] md:text-xs font-bold text-blue-500 w-8 text-right">{Math.max(1, similarity)}%</span>
+          <SlidersHorizontal size={16} className="text-slate-500" />
+          <span className="text-[10px] font-medium text-slate-400">Strictness Threshold</span>
+          <input type="range" min="1" max="100" value={similarityThreshold} onChange={(e) => setSimilarityThreshold(parseInt(e.target.value))} className="flex-grow accent-blue-500 h-1 bg-[#2d2d3f] rounded-lg cursor-pointer" />
+          <span className="text-[10px] font-bold text-blue-500 w-8 text-right">{similarityThreshold}%</span>
         </div>
-        <div className="text-[9px] md:text-[10px] text-slate-500 font-black uppercase tracking-widest mt-3">
-          DEEPINMIND SEARCH RESULTS: {filteredResults.length} MATCHES
-        </div>
+        <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest mt-3">FOUND {filteredResults.length} ACCURATE MATCHES</div>
       </div>
-
+      
       {filteredResults.length > 0 ? (
-        <div className="flex flex-col min-[1100px]:grid min-[1100px]:grid-cols-[1fr_450px] gap-6 md:gap-8">
-          {/* Results List */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 order-2 min-[1100px]:order-1">
-            {filteredResults.map((result) => (
-              <div
-                key={result.id}
-                onClick={() => handleSelectResult(result)}
-                className={`group relative rounded-xl overflow-hidden cursor-pointer border-2 transition-all ${
-                  selectedResult?.id === result.id ? 'border-blue-500 shadow-xl bg-[#11111a]' : 'border-transparent bg-[#11111a]/40 hover:bg-[#11111a]'
-                }`}
-              >
-                <div className="aspect-video relative overflow-hidden bg-slate-900 flex items-center justify-center">
-                  {!imageErrors[`thumb-${result.id}`] ? (
-                    <img 
-                      src={result.thumbnail} 
-                      alt={result.camera} 
-                      className="w-full h-full object-cover block transition-transform group-hover:scale-105"
-                      onError={() => handleImageError(`thumb-${result.id}`)}
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="flex flex-col items-center gap-2 text-slate-600">
-                      <ImageOff size={24} />
-                      <span className="text-[8px] uppercase tracking-tighter">No Preview</span>
-                    </div>
-                  )}
-                  <div className="absolute top-2 left-2 px-1.5 py-0.5 bg-blue-600/90 backdrop-blur-md rounded text-[8px] md:text-[9px] font-bold text-white flex items-center gap-1">
-                     {result.displayScore}% Sim.
+        <div className="flex flex-col min-[1100px]:grid min-[1100px]:grid-cols-[1fr_450px] gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 order-2 min-[1100px]:order-1">
+            {filteredResults.map((result) => {
+              return (
+                <div key={result.id} onClick={() => handleSelectResult(result)} className={`group relative rounded-xl overflow-hidden border-2 cursor-pointer transition-all ${selectedResult?.id === result.id ? 'border-blue-500 bg-[#11111a] ring-4 ring-blue-500/10' : 'border-transparent bg-[#11111a]/40 hover:bg-[#11111a]/60 hover:border-[#2d2d3f]'}`}>
+                  <div className="aspect-video relative overflow-hidden bg-slate-900">
+                    <img src={result.thumbnail} alt={result.camera} className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-700" />
+                    <div className="absolute top-2 left-2 px-1.5 py-0.5 bg-blue-600/90 backdrop-blur-sm rounded text-[8px] font-bold text-white z-20 shadow-lg">{result.displayScore}% Similarity</div>
+                    {selectedResult?.id === result.id && (
+                        <div className="absolute inset-0 bg-blue-500/10 z-10 pointer-events-none" />
+                    )}
+                  </div>
+                  <div className="p-3">
+                    <div className="text-[10px] font-bold text-slate-200 truncate">{result.camera}</div>
+                    <div className="text-[9px] text-slate-500 mt-1 flex items-center gap-1.5"><Clock size={10} /> {result.timestamp}</div>
                   </div>
                 </div>
-                <div className="p-2 md:p-3">
-                  <div className="text-[10px] md:text-[11px] font-bold text-slate-200 truncate">{result.camera}</div>
-                  <div className="text-[9px] md:text-[10px] text-slate-500 mt-1">{result.timestamp}</div>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
-
-          {/* Large Preview Sidebar */}
-          <div className="space-y-4 order-1 min-[1100px]:order-2">
-            <div className="min-[1100px]:sticky min-[1100px]:top-24 bg-[#11111a] rounded-2xl p-4 shadow-2xl border border-[#2d2d3f] overflow-hidden">
-              <div className="aspect-video relative rounded-lg overflow-hidden mb-4 bg-slate-900 border border-[#2d2d3f] flex items-center justify-center">
-                {selectedResult ? (
-                   !imageErrors[`preview-${selectedResult.id}`] ? (
-                     <img 
-                       key={`preview-${selectedResult.id}`}
-                       src={selectedResult.preview} 
-                       alt="Large Preview" 
-                       className="w-full h-full object-cover block animate-in fade-in duration-300"
-                       onError={() => handleImageError(`preview-${selectedResult.id}`)}
-                     />
-                   ) : (
-                     <div className="flex flex-col items-center gap-4 text-slate-600 text-center px-4">
-                        <ImageOff size={48} />
-                        <span className="text-xs font-bold uppercase tracking-widest leading-relaxed">Image Load Error<br/><span className="text-[10px] font-normal lowercase opacity-50">Remote asset unreachable</span></span>
-                     </div>
-                   )
-                ) : (
-                  <div className="text-slate-600 text-xs italic flex items-center gap-2">
-                    <Loader2 size={16} className="animate-spin" />
-                    Waiting for selection...
-                  </div>
+          <div className="order-1 min-[1100px]:order-2">
+            <div className="min-[1100px]:sticky min-[1100px]:top-24 bg-[#11111a] rounded-2xl p-4 shadow-2xl border border-[#2d2d3f]">
+              <div className="aspect-video relative rounded-lg overflow-hidden mb-4 bg-slate-900 border border-[#2d2d3f]">
+                {selectedResult && (
+                  <img src={selectedResult.preview} alt="Preview" className="w-full h-full object-cover animate-in fade-in duration-500" />
                 )}
-                <div className="absolute bottom-2 right-2 px-2 py-1 bg-black/60 rounded text-[8px] md:text-[9px] text-slate-300 pointer-events-none">REC 10:31:11</div>
+                <div className="absolute bottom-2 right-2 px-2 py-1 bg-black/60 backdrop-blur-sm rounded text-[8px] text-slate-300 z-20 font-mono">REC LIVE</div>
+                <div className="absolute top-2 right-2 flex gap-1 items-center">
+                    <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                    <span className="text-[8px] font-bold text-white uppercase tracking-tighter shadow-sm">AI Analyzed</span>
+                </div>
               </div>
-              
               {selectedResult && (
-                <div className="space-y-4 md:space-y-6">
-                  <div>
-                    <h3 className="text-sm md:text-base font-bold text-slate-200 mb-1">{selectedResult.camera}</h3>
-                    <p className="text-[10px] md:text-[11px] text-slate-500">{selectedResult.timestamp}</p>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2 md:gap-3">
-                    <div className="p-2 md:p-3 bg-[#2d2d3f]/40 rounded-lg border border-[#2d2d3f]">
-                      <div className="text-[8px] md:text-[9px] font-bold uppercase text-slate-500 mb-1">Duration</div>
-                      <div className="text-[10px] md:text-xs font-semibold text-slate-300 tracking-tighter">00:00:05.12</div>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-start">
+                    <div>
+                        <h3 className="text-sm font-bold text-slate-200 mb-1">{selectedResult.camera}</h3>
+                        <p className="text-[10px] text-slate-500 flex items-center gap-1.5"><Clock size={12} /> {selectedResult.timestamp}</p>
                     </div>
-                    <div className="p-2 md:p-3 bg-[#2d2d3f]/40 rounded-lg border border-[#2d2d3f]">
-                      <div className="text-[8px] md:text-[9px] font-bold uppercase text-slate-500 mb-1">Confidence</div>
-                      <div className="text-[10px] md:text-xs font-semibold text-blue-500">{selectedResult.displayScore}% Sim.</div>
+                    <div className="bg-blue-500/10 border border-blue-500/20 px-2 py-1 rounded">
+                        <span className="text-[9px] font-black text-blue-400">{selectedResult.displayScore}% Match</span>
                     </div>
                   </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="p-3 bg-[#2d2d3f]/20 rounded-lg border border-[#2d2d3f]"><div className="text-[8px] font-bold uppercase text-slate-500 mb-1">Duration</div><div className="text-[10px] font-semibold text-slate-300">00:00:05.12</div></div>
+                    <div className="p-3 bg-[#2d2d3f]/20 rounded-lg border border-[#2d2d3f]"><div className="text-[8px] font-bold uppercase text-slate-500 mb-1">Resolution</div><div className="text-[10px] font-semibold text-slate-300">4K AcuSense</div></div>
+                  </div>
+                  
+                  <div className="py-2">
+                    <div className="text-[8px] font-bold uppercase text-slate-600 mb-2 tracking-widest">Metadata Tags</div>
+                    <div className="flex flex-wrap gap-1.5">
+                        {selectedResult.tags.slice(0, 6).map(tag => (
+                            <span key={tag} className="px-2 py-0.5 bg-[#1c1c28] border border-[#2d2d3f] rounded text-[8px] text-slate-400">#{tag}</span>
+                        ))}
+                    </div>
+                  </div>
 
-                  <button
-                    onClick={handleShare}
-                    className="hidden min-[1100px]:flex w-full items-center justify-center gap-3 py-3.5 bg-[#1877F2] hover:bg-[#166fe5] text-white text-sm font-bold rounded-xl transition-all shadow-lg active:scale-95"
-                  >
-                    <Facebook size={16} fill="white" />
-                    Share Result on Facebook
-                  </button>
+                  <button onClick={handleShare} className="w-full flex items-center justify-center gap-3 py-3.5 bg-[#1877F2] hover:bg-[#166fe5] text-white text-sm font-bold rounded-xl shadow-lg transition-all active:scale-[0.97]"><Facebook size={16} fill="white" />Share Moment on Facebook</button>
                 </div>
               )}
             </div>
           </div>
-
-          {/* Mobile Bottom Bar */}
-          {selectedResult && (
-            <div className="min-[1100px]:hidden fixed bottom-0 left-0 right-0 p-4 bg-[#11111a]/95 backdrop-blur-md border-t border-[#2d2d3f] z-50 animate-in slide-in-from-bottom duration-300">
-              <div className="max-w-7xl mx-auto">
-                <button
-                  onClick={handleShare}
-                  className="w-full flex items-center justify-center gap-3 py-3 px-6 bg-[#1877F2] text-white text-sm font-bold rounded-lg shadow-lg active:scale-95"
-                >
-                  <Facebook size={16} fill="white" />
-                  Share Result to Facebook
-                </button>
-              </div>
-            </div>
-          )}
         </div>
       ) : (
-        <div className="bg-[#11111a] rounded-2xl p-10 md:p-16 text-center border border-[#2d2d3f]">
-          <div className="inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 bg-[#1c1c28] rounded-full mb-4">
-            <Search size={24} className="text-slate-600 md:w-7 md:h-7" />
-          </div>
-          <h3 className="text-sm md:text-base font-bold text-slate-300 mb-2">No results found</h3>
-          <p className="text-slate-500 text-[10px] md:text-xs max-w-xs mx-auto leading-relaxed">
-            Try describing scenes like "kids playing with lanterns" or "family iftar table".
-          </p>
+        <div className="bg-[#11111a] rounded-2xl p-20 text-center border border-[#2d2d3f] animate-in fade-in zoom-in-95 duration-300">
+            <ImageOff size={40} className="text-slate-700 mx-auto mb-4 opacity-50" />
+            <h3 className="text-sm font-bold text-slate-300 mb-1">No footage found</h3>
+            <p className="text-[10px] text-slate-500 max-w-xs mx-auto">Try adjusting the strictness slider or using different keywords like "lantern", "IFTAR", or "dates".</p>
         </div>
       )}
-
-      <div className="mt-8 md:mt-12 p-4 rounded-lg bg-[#11111a]/30 border border-[#2d2d3f] text-center">
-         <p className="text-[9px] md:text-[10px] text-slate-600 italic">
-           These results are simulated and shown for illustrative purposes only.
-         </p>
-      </div>
     </div>
   );
 };
