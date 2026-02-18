@@ -209,7 +209,8 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, initialResultId, onSearch
 
   const handleShare = () => {
     if (!selectedResult) return;
-    const fullUrl = `${window.location.origin}${window.location.pathname}#try?q=${encodeURIComponent(initialQuery)}&id=${selectedResult.id}`;
+    const baseUrl = 'https://acuseek-ramadan-git.vercel.app/';
+    const fullUrl = `${baseUrl}#try?q=${encodeURIComponent(initialQuery)}&id=${selectedResult.id}`;
     window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(fullUrl)}`, '_blank', 'width=600,height=400');
   };
 
