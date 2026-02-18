@@ -209,9 +209,8 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, initialResultId, onSearch
 
   const handleShare = () => {
     if (!selectedResult) return;
-    const baseUrl = 'https://acuseek-ramadan-git.vercel.app/';
-    const fullUrl = `${baseUrl}#try?q=${encodeURIComponent(initialQuery)}&id=${selectedResult.id}`;
-    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(fullUrl)}`, '_blank', 'width=600,height=400');
+    const shareUrl = 'https://acuseek-ramadan-git.vercel.app/';
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`, '_blank', 'width=600,height=400');
   };
 
   const exampleTerms = ['a box of dates', 'people having iftar meal', 'iftar cannon in the square', 'mesaharaty with drums', 'kids playing with lanterns', 'grand mosque entrance with decorations'];
