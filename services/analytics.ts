@@ -1,6 +1,7 @@
 /**
  * Analytics Service for AcuSeek Ramadan Challenge
  * Centralizes tracking for searches, navigation, and conversions.
+ * Now integrated with Meta Pixel tracking.
  */
 
 type EventName = 
@@ -12,6 +13,12 @@ type EventName =
 
 interface EventParams {
   [key: string]: string | number | boolean | undefined;
+}
+
+declare global {
+  interface Window {
+    fbq: any;
+  }
 }
 
 class AnalyticsService {
@@ -40,12 +47,40 @@ class AnalyticsService {
       console.error('Failed to save tracking data locally', e);
     }
 
-    /** 
-     * 3. PRODUCTION INTEGRATION 
-     * Here is where you would call your actual provider:
-     * window.gtag('event', eventName, params); // Google Analytics
-     * mixpanel.track(eventName, params);       // Mixpanel
-     */
+    // 3. META PIXEL INTEGRATION
+    if (typeof window !== 'undefined' && window.fbq) {
+      try {
+        switch (eventName) {
+          case 'search_performed':
+            window.fbq('track', 'Search', {
+              search_string: params?.query || params?.search_string,
+              ...params
+            });
+            break;
+          case 'result_selected':
+            window.fbq('track', 'ViewContent', {
+              content_name: params?.camera || params?.id,
+              content_ids: [params?.id],
+              content_type: 'video_moment',
+              ...params
+            });
+            break;
+          case 'share_to_facebook':
+            window.fbq('trackCustom', 'ShareToFacebook', params);
+            break;
+          case 'learn_more_click':
+            window.fbq('trackCustom', 'LearnMore', params);
+            break;
+          case 'tab_view':
+            window.fbq('trackCustom', 'TabView', params);
+            break;
+          default:
+            window.fbq('trackCustom', eventName, params);
+        }
+      } catch (fbError) {
+        console.error('Meta Pixel tracking error:', fbError);
+      }
+    }
   }
 
   /**
