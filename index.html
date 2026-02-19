@@ -18,9 +18,6 @@
     fbq('init', '198089284392434');
     fbq('track', 'PageView');
     </script>
-    <noscript><img height="1" width="1" style="display:none"
-    src="https://www.facebook.com/tr?id=198089284392434&ev=PageView&noscript=1"
-    /></noscript>
     <!-- End Meta Pixel Code -->
 
     <!-- Favicon -->
@@ -92,6 +89,10 @@
 </script>
 </head>
 <body class="min-h-screen overflow-x-hidden">
+    <!-- Meta Pixel noscript fallback -->
+    <noscript><img height="1" width="1" style="display:none"
+    src="https://www.facebook.com/tr?id=198089284392434&ev=PageView&noscript=1"
+    /></noscript>
     <div id="root"></div>
     <!-- Explicitly import the entry point for standard hosting compatibility -->
     <script type="module" src="index.tsx"></script>
