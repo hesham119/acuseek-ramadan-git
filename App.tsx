@@ -6,6 +6,7 @@ import LearnTab from './components/LearnTab';
 import TermsTab from './components/TermsTab';
 import { Search, Info, ShieldCheck } from 'lucide-react';
 import { analytics } from './services/analytics';
+import { Analytics } from '@vercel/analytics/react';
 
 const App: React.FC = () => {
   const [route, setRoute] = useState<RouteState>({ tab: AppTab.TRY, query: '' });
@@ -117,6 +118,7 @@ const App: React.FC = () => {
         <span className="order-1 md:order-2 opacity-40 uppercase tracking-widest font-bold">Hikvision</span>
         <span className="order-3">Usage Policy for AcuSeek</span>
       </footer>
+      <Analytics />
     </div>
   );
 };
