@@ -229,7 +229,7 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, initialResultId, onSearch
     window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`, '_blank', 'width=600,height=400');
   };
 
-  const exampleTerms = ['a box of dates', 'people having iftar meal', 'iftar cannon in the square', 'mesaharaty with drums', 'kids playing with lanterns', 'grand mosque entrance with decorations'];
+  const exampleTerms = ['people having iftar meal', 'iftar cannon in the square', 'mesaharaty with drums', 'kids playing with lanterns', 'grand mosque entrance with decorations'];
 
   if (!initialQuery) {
     return (

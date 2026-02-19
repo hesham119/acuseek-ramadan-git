@@ -17,7 +17,10 @@ const DRUMMER_TRADITIONAL_1 = 'https://i.imgur.com/zWDSurQ.png';
 const DRUMMER_TRADITIONAL_2 = 'https://i.imgur.com/cOBbprO.png';
 const MOSQUE_COURTYARD_URL = 'https://i.imgur.com/Z0wv2Mi.jpeg';
 const MOSQUE_ENTRANCE_URL = 'https://i.imgur.com/vCj6B04.jpeg';
+const MOSQUE_DECORATED_URL = 'https://i.imgur.com/qHXVrrU.png';
 const IFTAR_CANNON_URL = 'https://i.imgur.com/z34QecQ.jpeg';
+const IFTAR_CANNON_2_URL = 'https://i.imgur.com/CUj2TnE.png';
+const IFTAR_CANNON_3_URL = 'https://i.imgur.com/9NGPNrf.jpeg';
 
 export const STATIC_RESULTS: SearchResult[] = [
   {
@@ -96,6 +99,30 @@ export const STATIC_RESULTS: SearchResult[] = [
     rois: [
       { label: 'Iftar Cannon', tags: ['cannon', 'madfa'], box: { t: 40, l: 30, w: 30, h: 40 } },
       { label: 'Crowd', tags: ['people', 'crowd'], box: { t: 60, l: 0, w: 100, h: 40 } }
+    ]
+  },
+  {
+    id: '21',
+    thumbnail: IFTAR_CANNON_2_URL,
+    preview: IFTAR_CANNON_2_URL,
+    camera: 'Grand Plaza - Cam 05',
+    timestamp: '2024-03-27 18:33:10',
+    score: 100,
+    tags: ['cannon', 'iftar cannon', 'madfa-al-iftar', 'madfa', 'firing', 'tradition', 'plaza', 'square', 'public square', 'iftar cannon in the square'],
+    rois: [
+      { label: 'Iftar Cannon', tags: ['cannon', 'madfa'], box: { t: 35, l: 35, w: 30, h: 45 } }
+    ]
+  },
+  {
+    id: '22',
+    thumbnail: IFTAR_CANNON_3_URL,
+    preview: IFTAR_CANNON_3_URL,
+    camera: 'Historical District - Cam 02',
+    timestamp: '2024-03-28 18:35:05',
+    score: 100,
+    tags: ['cannon', 'iftar cannon', 'madfa-al-iftar', 'madfa', 'firing', 'tradition', 'plaza', 'square', 'public square', 'iftar cannon in the square', 'firing the madfa'],
+    rois: [
+      { label: 'Iftar Cannon', tags: ['cannon', 'madfa'], box: { t: 30, l: 20, w: 60, h: 50 } }
     ]
   },
   {
@@ -232,7 +259,7 @@ export const STATIC_RESULTS: SearchResult[] = [
     camera: 'Mosque Courtyard - Cam 04',
     timestamp: '2021-03-28 04:35:17',
     score: 100,
-    tags: ['mosque', 'courtyard', 'crescent', 'moon', 'star', 'lights', 'banners', 'night', 'people', 'plaza', 'fanoos', 'lantern', 'festive', 'mosque courtyard at night'],
+    tags: ['mosque', 'courtyard', 'crescent', 'moon', 'star', 'lights', 'banners', 'night', 'people', 'plaza', 'fanoos', 'lantern', 'festive', 'mosque courtyard at night', 'grand mosque entrance with decorations', 'grand', 'entrance', 'decorations'],
     rois: [
       { label: 'Crescent Moon', tags: ['crescent', 'moon', 'lights'], box: { t: 5, l: 35, w: 40, h: 50 } },
       { label: 'Mosque Plaza', tags: ['mosque', 'masjid', 'plaza', 'courtyard'], box: { t: 40, l: 0, w: 100, h: 60 } }
@@ -245,10 +272,23 @@ export const STATIC_RESULTS: SearchResult[] = [
     camera: 'Mosque Entrance - Cam 09',
     timestamp: '2024-03-29 20:15:00',
     score: 100,
-    tags: ['mosque', 'masjid', 'entrance', 'lights', 'decorations', 'plaza', 'night', 'celebration', 'festive', 'lantern', 'crescent', 'grand mosque entrance'],
+    tags: ['mosque', 'masjid', 'entrance', 'lights', 'decorations', 'plaza', 'night', 'celebration', 'festive', 'lantern', 'crescent', 'grand mosque entrance with decorations'],
     rois: [
       { label: 'Mosque Portal', tags: ['entrance', 'gate', 'mosque'], box: { t: 15, l: 15, w: 70, h: 75 } },
       { label: 'Ramadan Lights', tags: ['lantern', 'fanoos', 'lights', 'decorations'], box: { t: 0, l: 5, w: 90, h: 35 } }
+    ]
+  },
+  {
+    id: '23',
+    thumbnail: MOSQUE_DECORATED_URL,
+    preview: MOSQUE_DECORATED_URL,
+    camera: 'Grand Mosque Exterior - Cam 01',
+    timestamp: '2024-03-30 21:00:15',
+    score: 100,
+    tags: ['mosque', 'masjid', 'exterior', 'lights', 'decorations', 'night', 'fanoos', 'lantern', 'crescent', 'festive', 'mosque with decorations', 'grand mosque entrance with decorations', 'grand', 'entrance'],
+    rois: [
+      { label: 'Mosque Facade', tags: ['mosque', 'exterior'], box: { t: 10, l: 10, w: 80, h: 80 } },
+      { label: 'Ramadan Lights', tags: ['lights', 'decorations'], box: { t: 0, l: 0, w: 100, h: 40 } }
     ]
   }
 ];
