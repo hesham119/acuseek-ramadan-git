@@ -93,10 +93,26 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, initialResultId, onSearch
   const [selectedResult, setSelectedResult] = useState<SearchResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [hasAgreedToDisclaimer, setHasAgreedToDisclaimer] = useState(false);
+  const [dynamicPlaceholder, setDynamicPlaceholder] = useState("Describe what happened... e.g. 'people having iftar meal'");
 
   useEffect(() => {
     setQuery(initialQuery);
   }, [initialQuery]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 480) {
+        setDynamicPlaceholder("e.g. 'people having iftar meal'");
+      } else if (window.innerWidth < 768) {
+        setDynamicPlaceholder("Describe... e.g. 'iftar meal'");
+      } else {
+        setDynamicPlaceholder("Describe what happened... e.g. 'people having iftar meal'");
+      }
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const filteredResults = useMemo(() => {
     if (!initialQuery) return [];
@@ -231,8 +247,8 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, initialResultId, onSearch
                 type="text" 
                 value={query} 
                 onChange={(e) => setQuery(e.target.value)} 
-                placeholder="Describe what happened... e.g. 'people having iftar meal'" 
-                className="w-full h-12 md:h-16 px-6 sm:pr-40 rounded-2xl sm:rounded-full border border-[#2d2d3f] bg-[#11111a] text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-2xl" 
+                placeholder={dynamicPlaceholder} 
+                className="w-full h-12 md:h-16 px-5 sm:pr-40 rounded-2xl sm:rounded-full border border-[#2d2d3f] bg-[#11111a] text-slate-200 text-sm md:text-base focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-2xl transition-all" 
               />
               <button 
                 type="submit" 
@@ -299,7 +315,13 @@ const TryTab: React.FC<TryTabProps> = ({ initialQuery, initialResultId, onSearch
          <div className="flex items-center gap-3 w-full">
             <button onClick={() => onSearch('')} className="h-10 w-10 bg-[#11111a] border border-[#2d2d3f] rounded-xl text-slate-400 flex items-center justify-center hover:bg-[#1c1c28] transition-colors"><CornerUpLeft size={18} /></button>
             <form onSubmit={handleSearchSubmit} className="flex-grow relative h-10">
-               <input type="text" value={query} onChange={(e) => setQuery(e.target.value)} className="w-full h-full pl-10 pr-4 rounded-xl border border-[#2d2d3f] bg-[#11111a] text-slate-200 text-sm focus:ring-1 focus:ring-blue-500 outline-none" />
+               <input 
+                 type="text" 
+                 value={query} 
+                 onChange={(e) => setQuery(e.target.value)} 
+                 placeholder="Search moments..." 
+                 className="w-full h-full pl-10 pr-4 rounded-xl border border-[#2d2d3f] bg-[#11111a] text-slate-200 text-sm focus:ring-1 focus:ring-blue-500 outline-none" 
+               />
                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={14} />
             </form>
          </div>

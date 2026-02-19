@@ -3,12 +3,18 @@ import { SearchResult } from './types';
 const DATES_URL = 'https://i.imgur.com/OioTkdP.jpeg';
 const IFTAR_URL = 'https://i.imgur.com/o7gWRJQ.jpeg';
 const IFTAR_3_URL = 'https://i.imgur.com/oNuefvQ.jpeg';
+const IFTAR_4_URL = 'https://i.imgur.com/Uqtq3Qf.jpeg';
+const IFTAR_5_URL = 'https://i.imgur.com/8oT0iKl.png';
 const LANTERN_KIDS_URL = 'https://i.imgur.com/ogy6ELJ.jpeg';
 const LANTERN_KIDS_2_URL = 'https://i.imgur.com/q0sn2q7.jpeg';
+const LANTERN_NEW_URL = 'https://i.imgur.com/fDRFEvI.png';
+const LANTERN_KIDS_3_URL = 'https://i.imgur.com/InUIRPv.png';
 const SWEETS_BOX_URL_1 = 'https://i.imgur.com/oXC2Oa7.jpeg';
 const SWEETS_BOX_URL_2 = 'https://i.imgur.com/DBhBQsp.jpeg';
 const DRUMMER_ALLEY_URL = 'https://i.imgur.com/Iitu7qs.jpeg';
 const DRUMMER_FESTIVE_URL = 'https://i.imgur.com/2QwUBKc.jpeg';
+const DRUMMER_TRADITIONAL_1 = 'https://i.imgur.com/zWDSurQ.png';
+const DRUMMER_TRADITIONAL_2 = 'https://i.imgur.com/cOBbprO.png';
 const MOSQUE_COURTYARD_URL = 'https://i.imgur.com/Z0wv2Mi.jpeg';
 const MOSQUE_ENTRANCE_URL = 'https://i.imgur.com/vCj6B04.jpeg';
 const IFTAR_CANNON_URL = 'https://i.imgur.com/z34QecQ.jpeg';
@@ -41,6 +47,19 @@ export const STATIC_RESULTS: SearchResult[] = [
     ]
   },
   {
+    id: '18',
+    thumbnail: IFTAR_5_URL,
+    preview: IFTAR_5_URL,
+    camera: 'Community Center - Cam 06',
+    timestamp: '2024-03-25 18:50:45',
+    score: 100,
+    tags: ['iftar', 'dinner', 'gathering', 'ramadan', 'table', 'food', 'meal', 'people having iftar meal', 'breaking fast together', 'community dinner'],
+    rois: [
+      { label: 'People', tags: ['people', 'gathering', 'iftar'], box: { t: 20, l: 10, w: 80, h: 50 } },
+      { label: 'Meal Table', tags: ['table', 'food', 'iftar'], box: { t: 60, l: 5, w: 90, h: 30 } }
+    ]
+  },
+  {
     id: '7',
     thumbnail: IFTAR_3_URL,
     preview: IFTAR_3_URL,
@@ -51,6 +70,19 @@ export const STATIC_RESULTS: SearchResult[] = [
     rois: [
       { label: 'Iftar Tables', tags: ['iftar', 'table', 'food', 'meal'], box: { t: 25, l: 5, w: 90, h: 70 } },
       { label: 'People', tags: ['people', 'gathering', 'celebration'], box: { t: 10, l: 10, w: 80, h: 40 } }
+    ]
+  },
+  {
+    id: '15',
+    thumbnail: IFTAR_4_URL,
+    preview: IFTAR_4_URL,
+    camera: 'Street Banquet - Cam 05',
+    timestamp: '2024-03-30 18:42:10',
+    score: 100,
+    tags: ['iftar', 'dinner', 'gathering', 'ramadan', 'table', 'food', 'meal', 'people having iftar meal', 'street feast', 'community dinner'],
+    rois: [
+      { label: 'Long Table', tags: ['iftar', 'table', 'food'], box: { t: 30, l: 0, w: 100, h: 60 } },
+      { label: 'People', tags: ['people', 'gathering'], box: { t: 10, l: 10, w: 80, h: 40 } }
     ]
   },
   {
@@ -90,6 +122,31 @@ export const STATIC_RESULTS: SearchResult[] = [
     rois: [
       { label: 'Children', tags: ['kids', 'children', 'boys'], box: { t: 15, l: 20, w: 60, h: 80 } },
       { label: 'Fanoos', tags: ['lantern', 'fanoos', 'fanous'], box: { t: 40, l: 35, w: 30, h: 45 } }
+    ]
+  },
+  {
+    id: '16',
+    thumbnail: LANTERN_NEW_URL,
+    preview: LANTERN_NEW_URL,
+    camera: 'Main Plaza - Cam 02',
+    timestamp: '2024-03-25 20:05:30',
+    score: 100,
+    tags: ['lantern', 'fanous', 'fanoos', 'fanus', 'kids', 'children', 'ramadan', 'lights', 'celebration', 'playing', 'children playing with lanterns in the plaza', 'new fanoos display'],
+    rois: [
+      { label: 'Lantern Display', tags: ['lantern', 'fanoos', 'lights'], box: { t: 20, l: 20, w: 60, h: 60 } }
+    ]
+  },
+  {
+    id: '17',
+    thumbnail: LANTERN_KIDS_3_URL,
+    preview: LANTERN_KIDS_3_URL,
+    camera: 'Side Walk - Cam 08',
+    timestamp: '2024-03-26 19:15:22',
+    score: 100,
+    tags: ['lantern', 'fanous', 'fanoos', 'fanus', 'kids', 'children', 'ramadan', 'lights', 'celebration', 'playing', 'kids playing with lantern', 'traditional lantern'],
+    rois: [
+      { label: 'Children', tags: ['kids', 'children'], box: { t: 30, l: 15, w: 70, h: 65 } },
+      { label: 'Fanoos', tags: ['lantern', 'fanoos'], box: { t: 45, l: 35, w: 30, h: 40 } }
     ]
   },
   {
@@ -142,6 +199,30 @@ export const STATIC_RESULTS: SearchResult[] = [
     rois: [
       { label: 'Mesaharaty', tags: ['mesaharaty', 'drummer', 'man'], box: { t: 10, l: 35, w: 35, h: 85 } },
       { label: 'Festival Lights', tags: ['lights', 'decorations', 'banners'], box: { t: 0, l: 0, w: 100, h: 40 } }
+    ]
+  },
+  {
+    id: '19',
+    thumbnail: DRUMMER_TRADITIONAL_1,
+    preview: DRUMMER_TRADITIONAL_1,
+    camera: 'Old Quarter - Cam 12',
+    timestamp: '2024-03-27 02:45:10',
+    score: 100,
+    tags: ['drum', 'drummer', 'mesaharaty', 'suhoor', 'night', 'tradition', 'traditional drummer', 'man with drum'],
+    rois: [
+      { label: 'Mesaharaty', tags: ['mesaharaty', 'man'], box: { t: 20, l: 30, w: 40, h: 70 } }
+    ]
+  },
+  {
+    id: '20',
+    thumbnail: DRUMMER_TRADITIONAL_2,
+    preview: DRUMMER_TRADITIONAL_2,
+    camera: 'Residential Street - Cam 11',
+    timestamp: '2024-03-28 03:15:00',
+    score: 100,
+    tags: ['drum', 'drummer', 'mesaharaty', 'suhoor', 'night', 'tradition', 'street drummer', 'musaharaty'],
+    rois: [
+      { label: 'Mesaharaty', tags: ['mesaharaty', 'man'], box: { t: 15, l: 25, w: 50, h: 75 } }
     ]
   },
   {
